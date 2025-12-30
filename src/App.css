@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Brittanny';
+  src: url('/font/BrittanySignature.ttf') format('truetype');
+}
