@@ -285,7 +285,7 @@ function PrincipalPage() {
         title="Menú"
         side="left"
       >
-        <MenuContent />
+        <MenuContent onCategorySelect={() => setMenuOpen(false)} />
       </SidePanel>
 
       <SidePanel

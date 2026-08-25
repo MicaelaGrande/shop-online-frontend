@@ -1,6 +1,8 @@
 import { Instagram, Phone } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 function Footer() {
+  const [aboutOpen, setAboutOpen] = useState(false);
   const navigate = useNavigate();
   const showProducts = async (category = null) => {
     navigate("/catalog", { state: { categoryToFilter: category } });
@@ -18,16 +20,21 @@ function Footer() {
           >
             Volver al inicio
           </button>
-          <button className="text-white/70 hover:text-white text-sm font-medium underline transition-colors">
+          <button
+            onClick={() => setAboutOpen(true)}
+            className="text-white/70 hover:text-white text-sm font-medium underline transition-colors"
+          >
             Quiénes somos
           </button>
-          <button   onClick={() => showProducts()}
-          className="text-white/70 hover:text-white text-sm font-medium underline transition-colors">
+          <button
+            onClick={() => showProducts()}
+            className="text-white/70 hover:text-white text-sm font-medium underline transition-colors"
+          >
             Catálogo
           </button>
-          <button className="text-white/70 hover:text-white text-sm font-medium underline transition-colors">
+          {/* <button className="text-white/70 hover:text-white text-sm font-medium underline transition-colors">
             Pedidos y entregas
-          </button>
+          </button> */}
         </div>
 
         {/* Columna 2: Redes (Instagram) */}
@@ -66,6 +73,43 @@ function Footer() {
           </a>
         </div>
       </div>
+      {aboutOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+          onClick={() => setAboutOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="about-title"
+            className="w-full max-w-md rounded-xl bg-white p-6 text-gray-700 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2>Quiénes somos</h2>
+
+            <div className="space-y-4 text-justify text-sm leading-relaxed">
+              <p>
+                ¡Hola! Somos Mixshop, un emprendimiento familiar hecho con amor
+                de madre a hija. Nuestra idea nació para acercarte un bazar
+                lleno de sorpresas y soluciones para todos los días.
+              </p>
+
+              <p>
+                Navegá por nuestra tienda online como si estuvieras recorriendo
+                las góndolas de tu negocio de confianza: encontrá variedad, los
+                mejores precios y una atención súper cálida, sin moverte de tu
+                casa.
+              </p>
+            </div>
+            <button
+              onClick={() => setAboutOpen(false)}
+              className="mt-6 rounded-lg bg-[#0a3d64] px-5 py-2.5 font-bold text-white transition hover:bg-[#3163b3]"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
