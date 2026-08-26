@@ -13,162 +13,9 @@ import WhatsAppButton from "../components/WhatsAppButton";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { getProducts } from "../service/api";
 
-const availableProducts = [
-  {
-    id: 1,
-    name: "Remera Oversize",
-    description: "Remera 100% algodón, corte oversize.",
-    price: 2005.5,
-    categories: [
-      { id: 1, name: "Ropa Men" },
-      { id: 2, name: "Oversize" },
-      { id: 3, name: "Oversize" },
-      { id: 4, name: "Oversize" },
-      { id: 5, name: "Oversize" },
-    ],
-    media: [
-      { id: 1, url: "https://placehold.co/300x400/png?text=Foto+1" },
-      { id: 2, url: "https://placehold.co/300x400/png?text=Foto+2" },
-    ],
-  },
-  {
-    id: 20,
-    name: "Zapatillas Urban",
-    description: "Zapatillas cómodas para el día a día.",
-    price: 50000,
-    categories: [
-      { id: 3, name: "Calzado" },
-      { id: 4, name: "Urbano" },
-    ],
-    media: [{ id: 3, url: "https://placehold.co/300x400/png?text=Zapas+1" }],
-  },
-  {
-    id: 30,
-    name: "Remera Oversize",
-    description: "Remera 100% algodón, corte oversize.",
-    price: 25.0,
-    categories: [
-      { id: 1, name: "Ropa Men" },
-      { id: 2, name: "Oversize" },
-    ],
-    media: [
-      { id: 1, url: "https://placehold.co/300x400/png?text=Foto+1" },
-      { id: 2, url: "https://placehold.co/300x400/png?text=Foto+2" },
-    ],
-  },
-  {
-    id: 40,
-    name: "Zapatillas Urban",
-    description: "Zapatillas cómodas para el día a día.",
-    price: 50000,
-    categories: [
-      { id: 3, name: "Calzado" },
-      { id: 4, name: "Urbano" },
-    ],
-    media: [{ id: 3, url: "https://placehold.co/300x400/png?text=Zapas+1" }],
-  },
-  {
-    id: 12,
-    name: "Remera Oversize",
-    description: "Remera 100% algodón, corte oversize.",
-    price: 25.0,
-    categories: [
-      { id: 1, name: "Ropa Men" },
-      { id: 2, name: "Oversize" },
-    ],
-    media: [
-      { id: 1, url: "https://placehold.co/300x400/png?text=Foto+1" },
-      { id: 2, url: "https://placehold.co/300x400/png?text=Foto+2" },
-    ],
-  },
-  {
-    id: 22,
-    name: "Zapatillas Urban",
-    description: "Zapatillas cómodas para el día a día.",
-    price: 8000.5,
-    categories: [
-      { id: 3, name: "Calzado" },
-      { id: 4, name: "Urbano" },
-    ],
-    media: [{ id: 3, url: "https://placehold.co/300x400/png?text=Zapas+1" }],
-  },
-  {
-    id: 32,
-    name: "Remera Oversize",
-    description: "Remera 100% algodón, corte oversize.",
-    price: 25.0,
-    categories: [
-      { id: 1, name: "Ropa Men" },
-      { id: 2, name: "Oversize" },
-    ],
-    media: [
-      { id: 1, url: "https://placehold.co/300x400/png?text=Foto+1" },
-      { id: 2, url: "https://placehold.co/300x400/png?text=Foto+2" },
-    ],
-  },
-  {
-    id: 42,
-    name: "Zapatillas Urban",
-    description: "Zapatillas cómodas para el día a día.",
-    price: 50000,
-    categories: [
-      { id: 3, name: "Calzado" },
-      { id: 4, name: "Urbano" },
-    ],
-    media: [{ id: 3, url: "https://placehold.co/300x400/png?text=Zapas+1" }],
-  },
-  {
-    id: 11,
-    name: "Remera Oversize",
-    description: "Remera 100% algodón, corte oversize.",
-    price: 25.0,
-    categories: [
-      { id: 1, name: "Ropa Men" },
-      { id: 2, name: "Oversize" },
-    ],
-    media: [
-      { id: 1, url: "https://placehold.co/300x400/png?text=Foto+1" },
-      { id: 2, url: "https://placehold.co/300x400/png?text=Foto+2" },
-    ],
-  },
-  {
-    id: 21,
-    name: "Zapatillas Urban",
-    description: "Zapatillas cómodas para el día a día.",
-    price: 50000,
-    categories: [
-      { id: 3, name: "Calzado" },
-      { id: 4, name: "Urbano" },
-    ],
-    media: [{ id: 3, url: "https://placehold.co/300x400/png?text=Zapas+1" }],
-  },
-  {
-    id: 31,
-    name: "Remera Oversize",
-    description: "Remera 100% algodón, corte oversize.",
-    price: 25.0,
-    categories: [
-      { id: 1, name: "Ropa Men" },
-      { id: 2, name: "Oversize" },
-    ],
-    media: [
-      { id: 1, url: "https://placehold.co/300x400/png?text=Foto+1" },
-      { id: 2, url: "https://placehold.co/300x400/png?text=Foto+2" },
-    ],
-  },
-  {
-    id: 41,
-    name: "Zapatillas Urban",
-    description: "Zapatillas cómodas para el día a día.",
-    price: 50000,
-    categories: [
-      { id: 3, name: "Calzado" },
-      { id: 4, name: "Urbano" },
-    ],
-    media: [{ id: 3, url: "https://placehold.co/300x400/png?text=Zapas+1" }],
-  },
-];
+
 const promoBanners = [
   {
     id: 1,
@@ -185,7 +32,8 @@ const promoBanners = [
 function Catalog() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -196,10 +44,24 @@ function Catalog() {
   const hasCategory = categoryId !== undefined && categoryId !== null;
 
   const filteredProducts = hasCategory
-    ? availableProducts.filter((product) =>
+    ? products.filter((product) =>
         product.categories.some((category) => category.id === categoryId)
       )
-    : availableProducts;
+    : products;
+
+  useEffect(() => {
+    getProducts()
+      .then((data) => {
+        setProducts(data);
+      })
+      .catch(() => {
+        setError(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
   const showProducts = async (category = null) => {
     navigate("/catalog", { state: { categoryToFilter: category } });
   };
@@ -281,7 +143,7 @@ function Catalog() {
         title="Menú"
         side="left"
       >
-        <MenuContent  onCategorySelect={() => setMenuOpen(false)}/>
+        <MenuContent onCategorySelect={() => setMenuOpen(false)} />
       </SidePanel>
 
       <SidePanel

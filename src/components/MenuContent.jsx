@@ -1,45 +1,26 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getCategories } from "../service/api";
 
-const USE_BACKEND = false;
-
-const mockCategories = [
-  { id: 1, name: "Ropa Men" },
-  { id: 2, name: "Oversize" },
-  { id: 3, name: "Calzado" },
-  { id: 4, name: "Urbano" },
-  { id: 999, name: "Categoría vacía" },
-];
 
 export default function MenuContent({ onCategorySelect }) {
-  const [categories, setCategories] = useState(mockCategories);
-  const [loading, setLoading] = useState(USE_BACKEND);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!USE_BACKEND) {
-      return;
-    }
-
-    fetch("http://localhost:8000/products/categories")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("No se pudieron cargar las categorías");
-        }
-
-        return response.json();
-      })
-      .then((data) => {
-        setCategories(data);
-      })
-      .catch(() => {
-        setError(true);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+  getCategories()
+    .then((data) => {
+      setCategories(data);
+    })
+    .catch(() => {
+      setError(true);
+    })
+    .finally(() => {
+      setLoading(false);
+    });
+}, []);
 
   const selectCategory = (categoryId) => {
     onCategorySelect?.();
