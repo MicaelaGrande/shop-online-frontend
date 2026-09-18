@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCategories } from "../service/api";
 
-
 export default function MenuContent({ onCategorySelect }) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,25 +9,28 @@ export default function MenuContent({ onCategorySelect }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-  getCategories()
-    .then((data) => {
-      setCategories(data);
-    })
-    .catch(() => {
-      setError(true);
-    })
-    .finally(() => {
-      setLoading(false);
-    });
-}, []);
+    getCategories()
+      .then((data) => {
+        setCategories(data);
+      })
+      .catch(() => {
+        setError(true);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const goHome = () => {
+    onCategorySelect?.();
+    navigate("/");
+  };
 
   const selectCategory = (categoryId) => {
     onCategorySelect?.();
     navigate("/catalog", {
       state: { categoryToFilter: categoryId },
     });
-
-    
   };
 
   const showAllProducts = () => {
@@ -42,7 +44,7 @@ export default function MenuContent({ onCategorySelect }) {
     <ul className="flex flex-col gap-4 p-6 text-lg font-medium text-gray-700">
       <li>
         <button
-          onClick={showAllProducts}
+          onClick={goHome}
           className="w-full rounded-lg px-4 py-3 text-left transition-colors hover:bg-[#3163b3] hover:text-white"
         >
           Inicio
