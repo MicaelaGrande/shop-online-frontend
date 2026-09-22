@@ -6,6 +6,7 @@ import CartContent from "../containers/CartContent";
 import Footer from "./Footer";
 import Header from "./Header";
 import WhatsAppButton from "./WhatsAppButton";
+import SessionExpiredModal from "./SessionExpireModal";
 
 function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -57,6 +58,8 @@ function Layout() {
       >
         <CartContent />
       </SidePanel>
+
+      <SessionExpiredModal />
     </div>
   );
 }

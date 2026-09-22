@@ -1,16 +1,16 @@
 const API_URL = import.meta.env.VITE_SERVER_URI || "http://localhost:8000";
 
 async function request(endpoint, options = {}) {
-  const isFormData = options.body instanceof FormData;
-
+  const { authRequired = false, ...fetchOptions } = options;
+  const isFormData = fetchOptions.body instanceof FormData;
   const config = {
     credentials: "include",
-    ...options,
+    ...fetchOptions,
     headers: {
       ...(!isFormData && {
         "Content-Type": "application/json",
       }),
-      ...options.headers,
+      ...fetchOptions.headers,
     },
   };
 
@@ -29,6 +29,10 @@ async function request(endpoint, options = {}) {
   }
 
   if (!response.ok) {
+    if (response.status === 401 && authRequired) {
+      window.dispatchEvent(new Event("auth:unauthorized"));
+    }
+
     const error = new Error(
       responseData?.detail || `Error HTTP: ${response.status}`
     );
@@ -46,7 +50,9 @@ export function getProducts() {
   return request("/products/");
 }
 export function getDeletedProducts() {
-  return request("/products/admin/deleted");
+  return request("/products/admin/deleted", {
+    authRequired: true,
+  });
 }
 export function getProduct(productId) {
   return request(`/products/${productId}`);
@@ -56,18 +62,22 @@ export function updateProduct(productId, productData) {
   return request(`/products/${productId}`, {
     method: "PATCH",
     body: JSON.stringify(productData),
+    authRequired: true,
   });
 }
 
 export function deactivateProduct(productId) {
   return request(`/products/${productId}/deactivate`, {
     method: "PATCH",
+    authRequired: true,
   });
 }
+
 
 export function restoreProduct(productId) {
   return request(`/products/${productId}/restore`, {
     method: "PATCH",
+    authRequired: true,
   });
 }
 export function getCategories() {
@@ -86,10 +96,11 @@ export function loginAdmin(email, password) {
     body: formData,
   });
 }
-export function getCurrentAdmin() {
-  return request("/auth/me");
+export function getCurrentAdmin(authRequired = false) {
+  return request("/auth/me", {
+    authRequired,
+  });
 }
-
 export function logoutAdmin() {
   return request("/auth/logout", {
     method: "POST",
