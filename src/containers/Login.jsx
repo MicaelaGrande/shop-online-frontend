@@ -1,33 +1,34 @@
-import { useState } from "react";
-import { loginAdmin } from "../service/api";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useAuth } from '../contexts/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const validate = () => {
     let valid = true;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setEmailError("No es un email válido");
+      setEmailError('No es un email válido');
       valid = false;
     } else {
-      setEmailError("");
+      setEmailError('');
     }
 
     if (password.length < 12) {
-      setPasswordError("La contraseña debe contener al menos 12 caracteres");
+      setPasswordError('La contraseña debe contener al menos 12 caracteres');
       valid = false;
     } else {
-      setPasswordError("");
+      setPasswordError('');
     }
 
     return valid;
@@ -36,16 +37,16 @@ export default function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    setError("");
+    setError('');
     if (!validate()) return;
     setIsLoading(true);
 
     try {
-      await loginAdmin(email, password);
-      navigate("/");
+      await login(email, password);
+      navigate('/');
     } catch (error) {
-      if (error instanceof TypeError && error.message === "Failed to fetch") {
-        setError("No se pudo conectar con el servidor");
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        setError('No se pudo conectar con el servidor');
       } else {
         setError(error.message);
       }
@@ -72,7 +73,8 @@ export default function Login() {
       <div></div>
 
       <div className="flex flex-col items-center justify-center gap-2 mt-8">
-        <form noValidate
+        <form
+          noValidate
           onSubmit={handleSubmit}
           className="flex flex-col  items-center w-[calc(100%-2rem)] max-w-md rounded-xl bg-[#DDE8F3] space-y-3 p-5 shadow-lg sm:p-6"
         >
@@ -175,10 +177,7 @@ export default function Login() {
               aria-labelledby="error-title"
             >
               <div className="w-full max-w-sm rounded-xl bg-white p-6 text-center shadow-xl">
-                <h2
-                  id="error-title"
-                  className="text-lg font-bold text-[#0a3d64]"
-                >
+                <h2 id="error-title" className="text-lg font-bold text-[#0a3d64]">
                   Ocurrió un problema
                 </h2>
 
@@ -186,7 +185,7 @@ export default function Login() {
 
                 <button
                   type="button"
-                  onClick={() => setError("")}
+                  onClick={() => setError('')}
                   className="mt-5 rounded-lg bg-[#0a3d64] px-5 py-2 font-bold text-white"
                 >
                   Cerrar
@@ -222,7 +221,7 @@ export default function Login() {
               md:text-lg
             "
           >
-            {isLoading ? "Ingresando..." : "Iniciar sesión"}
+            {isLoading ? 'Ingresando...' : 'Iniciar sesión'}
           </button>
         </form>
       </div>
