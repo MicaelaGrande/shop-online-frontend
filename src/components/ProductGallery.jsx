@@ -1,13 +1,7 @@
-import { useState } from "react";
+import { Plus, X } from 'lucide-react';
+import { useState } from 'react';
 
-function ProductGallery({
-  product,
-  editMode,
-  mediaToDelete,
-  setMediaToDelete,
-  newMedia,
-  setNewMedia,
-}) {
+function ProductGallery({ product, editMode, mediaToDelete, setMediaToDelete, newMedia, setNewMedia }) {
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
 
@@ -17,23 +11,19 @@ function ProductGallery({
 
   const activeMedia = orderedMedia[activeMediaIndex];
 
-  const activeImageUrl =
-    activeMedia?.url || "https://placehold.co/600x700?text=Sin+Imagen";
+  const activeImageUrl = activeMedia?.url || 'https://placehold.co/600x700?text=Sin+Imagen';
   const MAX_PRODUCT_MEDIA = 6;
   const handleSelectFiles = (event) => {
     const selectedFiles = Array.from(event.target.files ?? []);
 
     const validFiles = selectedFiles.filter((file) => {
-      const validType = ["image/jpeg", "image/png", "image/webp"].includes(
-        file.type
-      );
+      const validType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
       const validSize = file.size <= 5 * 1024 * 1024;
 
       return validType && validSize;
     });
 
-    const currentMediaCount =
-      orderedMedia.length - mediaToDelete.length + newMedia.length;
+    const currentMediaCount = orderedMedia.length - mediaToDelete.length + newMedia.length;
     const availableSlots = MAX_PRODUCT_MEDIA - currentMediaCount;
 
     const filesToAdd = validFiles.slice(0, Math.max(availableSlots, 0));
@@ -41,18 +31,23 @@ function ProductGallery({
     const filesWithPreview = filesToAdd.map((file) => ({
       id: `new-${crypto.randomUUID()}`,
       file,
-      previewUrl: URL.createObjectURL(file),
+      previewUrl: URL.createObjectURL(file)
     }));
 
     setNewMedia((currentMedia) => [...currentMedia, ...filesWithPreview]);
 
-    event.target.value = "";
+    event.target.value = '';
+  };
+  const handleRemoveNewMedia = (mediaId, previewUrl) => {
+    URL.revokeObjectURL(previewUrl);
+
+    setNewMedia((currentMedia) => currentMedia.filter((media) => media.id !== mediaId));
   };
 
   return (
     <>
       <div className="flex flex-col gap-3">
-        <div className="flex aspect-[4/5] items-center justify-center overflow-hidden rounded-xl bg-white/20">
+        <div className="flex items-center justify-center overflow-hidden rounded-xl bg-white/20">
           <img
             src={activeImageUrl}
             alt={product.name}
@@ -61,19 +56,17 @@ function ProductGallery({
                 setSelectedImage(activeMedia.url);
               }
             }}
-            className="h-full w-full cursor-zoom-in object-contain"
+            className="max-h-[70vh] w-full cursor-zoom-in object-contain"
           />
         </div>
 
-        {orderedMedia.length > 0 && (
+        {(orderedMedia.length > 0 || editMode) && (
           <div className="flex gap-2 overflow-x-auto pb-2">
             {orderedMedia.map((media, index) => (
               <div
                 key={media.id}
                 className={`relative shrink-0 overflow-hidden rounded-md border-2 ${
-                  activeMediaIndex === index
-                    ? "border-[#3163b3]"
-                    : "border-transparent"
+                  activeMediaIndex === index ? 'border-[#3163b3]' : 'border-transparent'
                 }`}
               >
                 <button
@@ -82,11 +75,7 @@ function ProductGallery({
                   className="block"
                   aria-label={`Ver imagen ${index + 1}`}
                 >
-                  <img
-                    src={media.url}
-                    alt={`${product.name} ${index + 1}`}
-                    className="h-16 w-16 object-cover"
-                  />
+                  <img src={media.url} alt={`${product.name} ${index + 1}`} className="h-16 w-16 object-cover" />
                 </button>
 
                 {editMode && (
@@ -100,15 +89,9 @@ function ProductGallery({
                       )
                     }
                     className={`absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full text-sm font-bold text-white ${
-                      mediaToDelete.includes(media.id)
-                        ? "bg-gray-500"
-                        : "bg-red-600"
+                      mediaToDelete.includes(media.id) ? 'bg-gray-500' : 'bg-red-600'
                     }`}
-                    aria-label={
-                      mediaToDelete.includes(media.id)
-                        ? "Conservar imagen"
-                        : "Marcar imagen para eliminar"
-                    }
+                    aria-label={mediaToDelete.includes(media.id) ? 'Conservar imagen' : 'Marcar imagen para eliminar'}
                   >
                     -
                   </button>
@@ -121,11 +104,17 @@ function ProductGallery({
                   key={media.id}
                   className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 border-green-500"
                 >
-                  <img
-                    src={media.previewUrl}
-                    alt="Nueva imagen"
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={media.previewUrl} alt="Nueva imagen" className="h-full w-full object-cover" />
+
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveNewMedia(media.id, media.previewUrl)}
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-white"
+                    aria-label="Quitar imagen seleccionada"
+                    title="Quitar imagen seleccionada"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
                 </div>
               ))}
             {editMode && (

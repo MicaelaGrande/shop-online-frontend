@@ -7,6 +7,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { getProducts } from "../service/api";
+import { useAuth } from "../contexts/useAuth";
 
 const promoBanners = [
   {
@@ -26,6 +27,7 @@ function PrincipalPage() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
+  const { admin } = useAuth();
   useEffect(() => {
     getProducts()
       .then((data) => {
@@ -72,13 +74,13 @@ function PrincipalPage() {
           <div className="w-full py-2 px-4 md:py-3 md:px-6 bg-[#3163b3]/20 rounded-2xl overflow-hidden shadow-md mb-6">
             <div className="flex w-full items-center justify-between">
               <h3 className="text-xl md:text-2xl font-bold text-[#3163b3] mb-0">
-                ¡Nuevos ingresos!
+                {admin ? "¡Bienvenido Admin!" : "¡Nuevos ingresos!"}
               </h3>
               <button
                 onClick={() => showProducts()}
                 className="bg-[#3163b3] cursor-pointer active:scale-[0.98]  text-white rounded-md py-1.5 md:py-2 text-xs md:text-base font-semibold px-4 "
               >
-                Mas productos
+                {admin ? "Editar productos" : "Más productos"}
               </button>
             </div>
           </div>

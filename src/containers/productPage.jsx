@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getProduct } from "../service/api";
-import ProductGallery from "../components/ProductGallery";
-import { Pencil, Trash2 } from "lucide-react";
-import { useAuth } from "../contexts/useAuth";
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { getCategories, getProduct, updateProductWithMedia } from '../service/api';
+import ProductGallery from '../components/ProductGallery';
+import ProductEditForm from '../components/ProductEditForm';
+import ProductPrice from '../components/ProductPrice';
+import { Pencil, Trash2 } from 'lucide-react';
+import { useAuth } from '../contexts/useAuth';
 
 function ProductPage() {
   const { productId } = useParams();
@@ -15,6 +17,15 @@ function ProductPage() {
   const [error, setError] = useState(false);
   const [mediaToDelete, setMediaToDelete] = useState([]);
   const [newMedia, setNewMedia] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    getCategories()
+      .then(setCategories)
+      .catch(() => setSaveError('No se pudieron cargar las categorías.'));
+  }, []);
 
   useEffect(() => {
     getProduct(productId)
@@ -39,34 +50,72 @@ function ProductPage() {
   const startEditing = () => {
     setDraftProduct({
       name: product.name,
-      description: product.description ?? "",
+      category_ids: product.categories.map((category) => category.id),
+      description: product.description ?? '',
       price: product.price,
       is_on_sale: product.is_on_sale,
-      sale_price: product.sale_price ?? "",
+      sale_price: product.sale_price ?? ''
     });
 
     setEditMode(true);
   };
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+    setSaveError('');
 
+    try {
+      const updatedProduct = await updateProductWithMedia(
+        productId,
+        {
+          name: draftProduct.name,
+          category_ids: draftProduct.category_ids,
+          description: draftProduct.description,
+          price: draftProduct.price,
+          is_on_sale: draftProduct.is_on_sale,
+          sale_price: draftProduct.is_on_sale ? draftProduct.sale_price : null
+        },
+        mediaToDelete,
+        newMedia
+      );
+
+      setProduct(updatedProduct);
+
+      newMedia.forEach((media) => {
+        URL.revokeObjectURL(media.previewUrl);
+      });
+
+      setDraftProduct(null);
+      setMediaToDelete([]);
+      setNewMedia([]);
+      setEditMode(false);
+    } catch (error) {
+      setSaveError(error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
   const cancelEditing = () => {
     setDraftProduct(null);
     setMediaToDelete([]);
     setNewMedia([]);
     setEditMode(false);
   };
+
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-6 md:py-10">
-      <div className="mb-4 flex justify-end gap-2">
+      <div className="flex justify-end gap-2">
         {!authLoading && admin && (
           <>
             {editMode ? (
               <>
-                {" "}
+                {' '}
                 <button
                   type="button"
+                  onClick={handleSaveChanges}
+                  disabled={isSaving}
                   className="rounded-md bg-[#3163b3] px-4 py-2 font-semibold text-white transition hover:bg-[#244b8a]"
                 >
-                  Confirmar cambios
+                  {isSaving ? 'Guardando...' : 'Confirmar cambios'}
                 </button>
                 <button
                   type="button"
@@ -101,6 +150,11 @@ function ProductPage() {
           </>
         )}
       </div>
+      {saveError && (
+        <p className="text-sm font-semibold text-red-600" role="alert">
+          {saveError}
+        </p>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
         <ProductGallery
           product={product}
@@ -111,123 +165,25 @@ function ProductPage() {
           setNewMedia={setNewMedia}
         />
         {editMode ? (
-          <div className="flex w-full flex-col gap-4 self-start rounded-xl border border-white/20 bg-white/10 p-5 backdrop-blur-md md:p-6">
-            <label className="flex flex-col gap-1">
-              <span className="font-semibold text-[#3163b3]">Título</span>
-
-              <input
-                type="text"
-                value={draftProduct.name}
-                onChange={(event) =>
-                  setDraftProduct({
-                    ...draftProduct,
-                    name: event.target.value,
-                  })
-                }
-                className="rounded-md border border-gray-300 bg-white/70 px-3 py-2 text-gray-800"
-              />
-            </label>
-
-            {product.categories?.length > 0 && (
-              <p className="text-sm font-semibold text-gray-600">
-                {product.categories
-                  .map((category) => category.name)
-                  .join(" • ")}
-              </p>
-            )}
-
-            <label className="flex flex-col gap-1">
-              <span className="font-semibold text-[#3163b3]">Descripción</span>
-
-              <textarea
-                value={draftProduct.description}
-                onChange={(event) =>
-                  setDraftProduct({
-                    ...draftProduct,
-                    description: event.target.value,
-                  })
-                }
-                className="min-h-32 rounded-md border border-gray-300 bg-white/70 px-3 py-2 text-gray-800"
-              />
-            </label>
-
-            <label className="flex flex-col gap-1">
-              <span className="font-semibold text-[#3163b3]">Precio</span>
-
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={draftProduct.price}
-                onChange={(event) =>
-                  setDraftProduct({
-                    ...draftProduct,
-                    price: event.target.value,
-                  })
-                }
-                className="rounded-md border border-gray-300 bg-white/70 px-3 py-2 text-gray-800"
-              />
-            </label>
-            <label className="flex items-center gap-3 font-semibold text-[#3163b3]">
-              <input
-                type="checkbox"
-                checked={draftProduct.is_on_sale}
-                onChange={(event) =>
-                  setDraftProduct({
-                    ...draftProduct,
-                    is_on_sale: event.target.checked,
-                    sale_price: event.target.checked
-                      ? draftProduct.sale_price
-                      : "",
-                  })
-                }
-                className="h-5 w-5 accent-[#3163b3]"
-              />
-              Activar oferta
-            </label>
-            {draftProduct.is_on_sale && (
-              <label className="flex flex-col gap-1">
-                <span className="font-semibold text-[#3163b3]">
-                  Precio de oferta
-                </span>
-
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={draftProduct.sale_price}
-                  onChange={(event) =>
-                    setDraftProduct({
-                      ...draftProduct,
-                      sale_price: event.target.value,
-                    })
-                  }
-                  className="rounded-md border border-gray-300 bg-white/70 px-3 py-2 text-gray-800"
-                />
-              </label>
-            )}
-          </div>
+          <ProductEditForm
+            product={product}
+            draftProduct={draftProduct}
+            setDraftProduct={setDraftProduct}
+            categories={categories}
+          />
         ) : (
-          <div className="flex w-full flex-col gap-4 self-start rounded-xl border border-white/20 bg-white/10 p-5 backdrop-blur-md md:p-6">
-            <h1 className="text-2xl font-bold text-[#3163b3] md:text-4xl">
-              {product.name}
-            </h1>
+          <div className=" relative flex w-full flex-col gap-4 self-start rounded-xl border border-white/20 bg-white/10 p-5 backdrop-blur-md md:p-6">
+            <h1 className=" pr-14 text-2xl font-bold text-[#3163b3] md:text-4xl">{product.name}</h1>
 
             {product.categories?.length > 0 && (
               <p className="text-sm font-semibold text-gray-600 md:text-base">
-                {product.categories
-                  .map((category) => category.name)
-                  .join(" • ")}
+                {product.categories.map((category) => category.name).join(' • ')}
               </p>
             )}
 
-            <p className="text-base text-gray-700 md:text-lg">
-              {product.description}
-            </p>
+            <p className="text-base text-gray-700 md:text-lg">{product.description}</p>
 
-            <p className="text-2xl font-bold text-[#3163b3]">
-              ${product.price}
-            </p>
+            <ProductPrice price={product.price} isOnSale={product.is_on_sale} salePrice={product.sale_price} />
 
             <button
               type="button"
