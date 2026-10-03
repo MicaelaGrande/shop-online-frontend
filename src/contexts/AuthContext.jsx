@@ -1,19 +1,28 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getCurrentAdmin, loginAdmin } from '../service/api';
+import { getCurrentAdmin, loginAdmin, logoutAdmin as logoutApi } from '../service/api';
 import { AuthContext } from './auth-context';
 
 export function AuthProvider({ children }) {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sessionExpired, setSessionExpired] = useState(false);
-  const [hasAuthenticatedAdmin, setHasAuthenticatedAdmin] = useState(
-    () => sessionStorage.getItem('admin-session-started') === 'true'
-  );
+
+  const logoutAdmin = async () => {
+    try {
+      await logoutApi();
+    } catch (error) {
+      // aunque falle el backend, igual limpiamos el frontend
+    } finally {
+      setAdmin(null);
+      setSessionExpired(false);
+      sessionStorage.removeItem('admin-session-started');
+    }
+  };
+
   const login = async (email, password) => {
     const currentAdmin = await loginAdmin(email, password);
 
     setAdmin(currentAdmin);
-    setHasAuthenticatedAdmin(true);
     setSessionExpired(false);
     sessionStorage.setItem('admin-session-started', 'true');
 
@@ -24,11 +33,11 @@ export function AuthProvider({ children }) {
     getCurrentAdmin()
       .then((currentAdmin) => {
         setAdmin(currentAdmin);
-        setHasAuthenticatedAdmin(true);
         sessionStorage.setItem('admin-session-started', 'true');
       })
       .catch(() => {
         setAdmin(null);
+        sessionStorage.removeItem('admin-session-started');
       })
       .finally(() => {
         setLoading(false);
@@ -37,15 +46,14 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const checkSession = () => {
-      if (document.visibilityState === 'hidden') {
-        return;
-      }
+      if (document.visibilityState === 'hidden') return;
+      if (!admin) return;
 
-      if (!hasAuthenticatedAdmin) {
-        return;
-      }
-
-      getCurrentAdmin(true).catch(() => {});
+      getCurrentAdmin(true).catch(() => {
+        setAdmin(null);
+        setSessionExpired(true);
+        sessionStorage.removeItem('admin-session-started');
+      });
     };
 
     window.addEventListener('focus', checkSession);
@@ -55,12 +63,13 @@ export function AuthProvider({ children }) {
       window.removeEventListener('focus', checkSession);
       document.removeEventListener('visibilitychange', checkSession);
     };
-  }, [hasAuthenticatedAdmin]);
+  }, [admin]);
 
   useEffect(() => {
     const handleUnauthorized = () => {
       setAdmin(null);
       setSessionExpired(true);
+      sessionStorage.removeItem('admin-session-started');
     };
 
     window.addEventListener('auth:unauthorized', handleUnauthorized);
@@ -71,8 +80,16 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ admin, loading, login, setAdmin, sessionExpired, setSessionExpired }),
-    [admin, loading, login, sessionExpired]
+    () => ({
+      admin,
+      loading,
+      login,
+      logoutAdmin,
+      setAdmin,
+      sessionExpired,
+      setSessionExpired,
+    }),
+    [admin, loading, sessionExpired]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

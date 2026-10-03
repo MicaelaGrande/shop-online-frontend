@@ -1,16 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
+import { logoutAdmin } from "../service/api";
 
 function SessionExpiredModal() {
   const navigate = useNavigate();
-  const { sessionExpired } = useAuth();
+  const { sessionExpired, logoutAdmin } = useAuth();
 
   if (!sessionExpired) {
     return null;
   }
 
-  const goToLogin = () => {
+  const goToLogin = async () => {
+    await logoutAdmin();
     navigate("/login", { replace: true });
+  };
+
+  const goToHome = async () => {
+    await logoutAdmin();
+    navigate("/", { replace: true });
   };
 
   return (
@@ -32,14 +39,23 @@ function SessionExpiredModal() {
           Tu sesión de administrador terminó. Iniciá sesión nuevamente para
           continuar.
         </p>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <button
+            type="button"
+            onClick={goToHome}
+            className="w-full rounded-md border border-gray-300 bg-white px-5 py-3 font-semibold text-gray-700 hover:bg-gray-100"
+          >
+            Volver a la página principal
+          </button>
 
-        <button
-          type="button"
-          onClick={goToLogin}
-          className="w-full rounded-md bg-[#3163b3] px-5 py-3 font-semibold text-white hover:bg-[#244b8a]"
-        >
-          Volver a iniciar sesión
-        </button>
+          <button
+            type="button"
+            onClick={goToLogin}
+            className="w-full rounded-md bg-[#3163b3] px-5 py-3 font-semibold text-white hover:bg-[#244b8a]"
+          >
+            Volver a iniciar sesión
+          </button>
+        </div>
       </div>
     </div>
   );
