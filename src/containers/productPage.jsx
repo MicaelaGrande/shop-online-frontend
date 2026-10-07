@@ -1,15 +1,23 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getCategories, getProduct, updateProductWithMedia } from '../service/api';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+  deactivateProduct,
+  getCategories,
+  getProduct,
+  updateProductWithMedia,
+} from '../service/api';
 import ProductGallery from '../components/ProductGallery';
 import ProductEditForm from '../components/ProductEditForm';
 import ProductPrice from '../components/ProductPrice';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/useAuth';
+import { useCart } from "../contexts/useCart";
 
 function ProductPage() {
   const { productId } = useParams();
+  const navigate = useNavigate();
   const { admin, loading: authLoading } = useAuth();
+  const { addToCart } = useCart();
   const [editMode, setEditMode] = useState(false);
   const [draftProduct, setDraftProduct] = useState(null);
   const [product, setProduct] = useState(null);
@@ -18,6 +26,7 @@ function ProductPage() {
   const [mediaToDelete, setMediaToDelete] = useState([]);
   const [newMedia, setNewMedia] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [categories, setCategories] = useState([]);
 
@@ -100,6 +109,24 @@ function ProductPage() {
     setNewMedia([]);
     setEditMode(false);
   };
+  const handleDeactivateProduct = async () => {
+    const confirmed = window.confirm(
+      `¿Desactivar el producto "${product.name}"? Dejará de aparecer en el catálogo activo.`
+    );
+
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    setSaveError('');
+
+    try {
+      await deactivateProduct(productId);
+      navigate('/catalog', { replace: true });
+    } catch (requestError) {
+      setSaveError(requestError.message || 'No se pudo desactivar el producto.');
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-6 md:py-10">
@@ -139,6 +166,8 @@ function ProductPage() {
 
                 <button
                   type="button"
+                  onClick={handleDeactivateProduct}
+                  disabled={isDeleting}
                   className="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-red-600 shadow-md transition hover:bg-white"
                   aria-label="Eliminar producto"
                   title="Eliminar producto"
@@ -187,6 +216,7 @@ function ProductPage() {
 
             <button
               type="button"
+              onClick={() => addToCart(product)}
               className="w-full rounded-md bg-[#3163b3] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#244b8a] md:w-fit"
             >
               Agregar al carrito
