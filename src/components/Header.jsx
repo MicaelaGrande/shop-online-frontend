@@ -1,6 +1,17 @@
 import { Menu, Search, ShoppingBag } from "lucide-react";
 
-function Header({ setMenuOpen, setShopOpen, searchOpen, setSearchOpen }) {
+function Header({
+  setMenuOpen,
+  setShopOpen,
+  searchTerm,
+  setSearchTerm,
+  onSearch,
+}) {
+  const handleSearchKeyDown = (event) => {
+    if (event.key === "Enter") {
+      onSearch();
+    }
+  };
   return (
     <div className="h-auto bg-white/10 backdrop-blur-sm p-4 transition-colors duration-200 ">
       <div className="w-full max-w-7xl mx-auto flex flex-col gap-4">
@@ -36,10 +47,13 @@ function Header({ setMenuOpen, setShopOpen, searchOpen, setSearchOpen }) {
             <input
               type="text"
               placeholder="Buscar..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              onKeyDown={handleSearchKeyDown}
               className="h-10 w-full px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
-              onClick={() => setSearchOpen(!searchOpen)}
+              onClick={onSearch}
               className="h-10 px-3 flex items-center justify-center bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <Search className="w-5 h-5 mx-1" />
@@ -66,11 +80,14 @@ function Header({ setMenuOpen, setShopOpen, searchOpen, setSearchOpen }) {
             <input
               type="text"
               placeholder="Buscar productos en toda la tienda..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              onKeyDown={handleSearchKeyDown}
               className="h-12 w-full px-6 border shadow-sm border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               autoFocus
             />
             <button
-              onClick={() => setSearchOpen(!searchOpen)}
+              onClick={onSearch}
               className="h-12 px-6 flex items-center justify-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-md"
             >
               <Search className="w-6 h-6" />

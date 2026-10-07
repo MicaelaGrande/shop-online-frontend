@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useCart } from "../contexts/useCart";
 import SidePanel from "./SidePanel";
 import MenuContent from "./MenuContent";
 import CartContent from "../containers/CartContent";
@@ -12,6 +13,26 @@ function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
+  const { refreshCart } = useCart();
+
+  const handleSearch = () => {
+    const trimmedSearch = searchTerm.trim();
+
+    if (!trimmedSearch) {
+      navigate("/catalog");
+      return;
+    }
+
+    navigate(`/catalog?search=${encodeURIComponent(trimmedSearch)}`);
+    setSearchOpen(false);
+  };
+
+  const handleOpenShop = () => {
+    setShopOpen(true);
+    refreshCart();
+  };
 
   return (
     <div
@@ -27,9 +48,12 @@ function Layout() {
       <div className="min-h-screen flex flex-col">
         <Header
           setMenuOpen={setMenuOpen}
-          setShopOpen={setShopOpen}
+          setShopOpen={handleOpenShop}
           searchOpen={searchOpen}
           setSearchOpen={setSearchOpen}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onSearch={handleSearch}
         />
 
         <main className="flex-1">
