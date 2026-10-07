@@ -37,7 +37,7 @@ export default function SidePanel({
         </div>
 
         {/* Contenido */}
-        <div className="overflow-y-auto h-[calc(100%-73px)]">{children}</div>
+        <div className="h-[calc(100%-73px)] overflow-hidden">{children}</div>
       </div>
     </>
   );

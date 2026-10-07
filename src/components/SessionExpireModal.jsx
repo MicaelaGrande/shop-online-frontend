@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
-import { logoutAdmin } from "../service/api";
 
 function SessionExpiredModal() {
   const navigate = useNavigate();

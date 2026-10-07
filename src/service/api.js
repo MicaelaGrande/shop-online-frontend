@@ -55,6 +55,18 @@ async function request(endpoint, options = {}) {
 export function getProducts() {
   return request("/products/");
 }
+export function searchProducts(query) {
+  const encodedQuery = encodeURIComponent(query.trim());
+
+  return request(`/products/search?q=${encodedQuery}`);
+}
+export function searchDeletedProducts(query) {
+  const encodedQuery = encodeURIComponent(query.trim());
+
+  return request(`/products/admin/deleted/search?q=${encodedQuery}`, {
+    authRequired: true,
+  });
+}
 export function getDeletedProducts() {
   return request("/products/admin/deleted", {
     authRequired: true,
@@ -180,7 +192,6 @@ export function getCurrentAdmin(authRequired = false) {
 export function logoutAdmin() {
   return request("/auth/logout", {
     method: "POST",
-    authRequired: true,
   });
 }
 export function updateProductWithMedia(

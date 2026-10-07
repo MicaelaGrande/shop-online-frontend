@@ -1,29 +1,40 @@
-import { useEffect, useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
-import ProductCard from '../components/ProductCard';
-import { deactivateProduct, getDeletedProducts, getProducts, restoreProduct } from '../service/api';
-import { useAuth } from '../contexts/useAuth';
+import { useEffect, useState } from "react";
+import { useLocation, Link } from "react-router-dom";
+import ProductCard from "../components/ProductCard";
+import {
+  deactivateProduct,
+  getDeletedProducts,
+  getProducts,
+  restoreProduct,
+  searchProducts,
+  searchDeletedProducts,
+} from "../service/api";
+import { useAuth } from "../contexts/useAuth";
 
 function Catalog() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const searchTerm = searchParams.get("search")?.trim() ?? "";
   const [error, setError] = useState(null);
   const { admin } = useAuth();
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedProductIds, setSelectedProductIds] = useState([]);
   const [isUpdatingSelection, setIsUpdatingSelection] = useState(false);
-  const [selectionError, setSelectionError] = useState('');
-  const [productStatusFilter, setProductStatusFilter] = useState('active');
+  const [selectionError, setSelectionError] = useState("");
+  const [productStatusFilter, setProductStatusFilter] = useState("active");
   const categoryId = location.state?.categoryToFilter;
 
   const hasCategory = categoryId !== undefined && categoryId !== null;
   const categoryFilteredProducts = hasCategory
-    ? products.filter((product) => product.categories.some((category) => category.id === categoryId))
+    ? products.filter((product) =>
+        product.categories.some((category) => category.id === categoryId)
+      )
     : products;
 
   const filteredProducts = categoryFilteredProducts.filter((product) =>
-    productStatusFilter === 'active' ? product.is_active : !product.is_active
+    productStatusFilter === "active" ? product.is_active : !product.is_active
   );
 
   useEffect(() => {
@@ -35,8 +46,12 @@ function Catalog() {
 
       try {
         const [activeProducts, inactiveProducts] = await Promise.all([
-          getProducts(),
-          admin ? getDeletedProducts() : Promise.resolve([])
+          searchTerm ? searchProducts(searchTerm) : getProducts(),
+          admin
+            ? searchTerm
+              ? searchDeletedProducts(searchTerm)
+              : getDeletedProducts()
+            : Promise.resolve([]),
         ]);
 
         if (!cancelled) {
@@ -58,7 +73,7 @@ function Catalog() {
     return () => {
       cancelled = true;
     };
-  }, [admin]);
+  }, [admin, searchTerm]);
 
   const startSelection = () => {
     setSelectedProductIds([]);
@@ -72,30 +87,42 @@ function Catalog() {
 
   const toggleProductSelection = (productId) => {
     setSelectedProductIds((currentIds) =>
-      currentIds.includes(productId) ? currentIds.filter((id) => id !== productId) : [...currentIds, productId]
+      currentIds.includes(productId)
+        ? currentIds.filter((id) => id !== productId)
+        : [...currentIds, productId]
     );
   };
   const updateSelectedProductsStatus = async () => {
     if (selectedProductIds.length === 0) return;
 
-    const shouldActivate = productStatusFilter === 'inactive';
+    const shouldActivate = productStatusFilter === "inactive";
     const action = shouldActivate ? restoreProduct : deactivateProduct;
-    const actionLabel = shouldActivate ? 'Activar' : 'Desactivar';
-    const confirmed = window.confirm(`¿${actionLabel} ${selectedProductIds.length} productos seleccionados?`);
+    const actionLabel = shouldActivate ? "Activar" : "Desactivar";
+    const confirmed = window.confirm(
+      `¿${actionLabel} ${selectedProductIds.length} productos seleccionados?`
+    );
 
     if (!confirmed) return;
 
     setIsUpdatingSelection(true);
-    setSelectionError('');
+    setSelectionError("");
 
-    const results = await Promise.allSettled(selectedProductIds.map((productId) => action(productId)));
+    const results = await Promise.allSettled(
+      selectedProductIds.map((productId) => action(productId))
+    );
 
-    const successfulIds = selectedProductIds.filter((_, index) => results[index].status === 'fulfilled');
-    const failedIds = selectedProductIds.filter((_, index) => results[index].status === 'rejected');
+    const successfulIds = selectedProductIds.filter(
+      (_, index) => results[index].status === "fulfilled"
+    );
+    const failedIds = selectedProductIds.filter(
+      (_, index) => results[index].status === "rejected"
+    );
 
     setProducts((currentProducts) =>
       currentProducts.map((product) =>
-        successfulIds.includes(product.id) ? { ...product, is_active: shouldActivate } : product
+        successfulIds.includes(product.id)
+          ? { ...product, is_active: shouldActivate }
+          : product
       )
     );
     setSelectedProductIds(failedIds);
@@ -104,7 +131,9 @@ function Catalog() {
       cancelSelection();
     } else {
       setSelectionError(
-        `Se ${shouldActivate ? 'activaron' : 'desactivaron'} ${successfulIds.length}; no se pudieron actualizar ${failedIds.length}.`
+        `Se ${shouldActivate ? "activaron" : "desactivaron"} ${
+          successfulIds.length
+        }; no se pudieron actualizar ${failedIds.length}.`
       );
     }
 
@@ -129,12 +158,18 @@ function Catalog() {
                   <button
                     type="button"
                     onClick={updateSelectedProductsStatus}
-                    disabled={selectedProductIds.length === 0 || isUpdatingSelection}
+                    disabled={
+                      selectedProductIds.length === 0 || isUpdatingSelection
+                    }
                     className="rounded-md bg-[#3163b3] px-4 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isUpdatingSelection
-                      ? 'Actualizando...'
-                      : `${productStatusFilter === 'inactive' ? 'Activar' : 'Desactivar'} seleccionados (${selectedProductIds.length})`}
+                      ? "Actualizando..."
+                      : `${
+                          productStatusFilter === "inactive"
+                            ? "Activar"
+                            : "Desactivar"
+                        } seleccionados (${selectedProductIds.length})`}
                   </button>
                 </>
               ) : (
@@ -164,9 +199,13 @@ function Catalog() {
             >
               <button
                 type="button"
-                aria-pressed={productStatusFilter === 'active'}
-                onClick={() => setProductStatusFilter('active')}
-                className={productStatusFilter === 'active' ? 'text-[#3163b3]' : 'text-gray-500 hover:text-[#3163b3]'}
+                aria-pressed={productStatusFilter === "active"}
+                onClick={() => setProductStatusFilter("active")}
+                className={
+                  productStatusFilter === "active"
+                    ? "text-[#3163b3]"
+                    : "text-gray-500 hover:text-[#3163b3]"
+                }
               >
                 Activos
               </button>
@@ -177,12 +216,24 @@ function Catalog() {
 
               <button
                 type="button"
-                aria-pressed={productStatusFilter === 'inactive'}
-                onClick={() => setProductStatusFilter('inactive')}
-                className={productStatusFilter === 'inactive' ? 'text-[#3163b3]' : 'text-gray-500 hover:text-[#3163b3]'}
+                aria-pressed={productStatusFilter === "inactive"}
+                onClick={() => setProductStatusFilter("inactive")}
+                className={
+                  productStatusFilter === "inactive"
+                    ? "text-[#3163b3]"
+                    : "text-gray-500 hover:text-[#3163b3]"
+                }
               >
                 Inactivos
               </button>
+              {selectionError && (
+                <p
+                  className="mb-4 text-sm font-semibold text-red-700"
+                  role="alert"
+                >
+                  {selectionError}
+                </p>
+              )}
             </div>
           )}
         </>
@@ -190,11 +241,23 @@ function Catalog() {
       {/* SECCIÓN 2 - Productos */}
       <div className="w-full">
         {error ? (
-          <p className="text-center text-xl font-semibold text-red-600">Ocurrió un error al cargar los productos.</p>
+          <p className="text-center text-xl font-semibold text-red-600">
+            Ocurrió un error al cargar los productos.
+          </p>
         ) : loading ? (
-          <p className="text-center text-xl font-semibold text-[#3163b3]">Cargando productos...</p>
+          <p className="text-center text-xl font-semibold text-[#3163b3]">
+            Cargando productos...
+          </p>
         ) : filteredProducts.length === 0 ? (
-          <p className="text-center text-xl font-semibold text-[#3163b3]">No hay productos en esta categoría.</p>
+          <p className="text-center text-xl font-semibold text-[#3163b3]">
+            {searchTerm
+              ? "No se encontraron resultados para esta búsqueda."
+              : hasCategory
+              ? "No hay productos en esta categoría."
+              : productStatusFilter === "inactive"
+              ? "No hay productos inactivos."
+              : "No hay productos disponibles."}
+          </p>
         ) : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
