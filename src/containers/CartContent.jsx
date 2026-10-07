@@ -1,58 +1,44 @@
-import { Minus, Plus, ShoppingBag, Trash2, Check } from "lucide-react";
-import { useCart } from "../contexts/useCart";
-import { useState } from "react";
+import { Minus, Plus, ShoppingBag, Trash2, Check } from 'lucide-react';
+import { useCart } from '../contexts/useCart';
+import { useState } from 'react';
+import CheckoutForm from '../components/CheckoutForm';
 
-const currencyFormatter = new Intl.NumberFormat("es-AR", {
-  style: "currency",
-  currency: "ARS",
+const currencyFormatter = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: 'ARS'
 });
 
 export default function CartContent() {
-  const {
-    items,
-    removeFromCart,
-    updateQuantity,
-    totalItems,
-    totalPrice,
-    refreshCart,
-    acknowledgePriceChange,
-  } = useCart();
+  const { items, removeFromCart, updateQuantity, totalItems, totalPrice, refreshCart, acknowledgePriceChange } =
+    useCart();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshMessage, setRefreshMessage] = useState("");
+  const [refreshMessage, setRefreshMessage] = useState('');
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const handleRemoveItem = (productId) => {
     removeFromCart(productId);
-    setRefreshMessage("");
+    setRefreshMessage('');
   };
   const handleBeforeCheckout = async () => {
     setIsRefreshing(true);
-    setRefreshMessage("");
+    setRefreshMessage('');
 
     try {
       const refreshedItems = await refreshCart();
 
-      const hasUnavailableItems = refreshedItems.some(
-        (item) => !item.isAvailable
-      );
+      const hasUnavailableItems = refreshedItems.some((item) => !item.isAvailable);
 
-      const hasUpdatedPrices = refreshedItems.some(
-        (item) => item.priceWasUpdated
-      );
+      const hasUpdatedPrices = refreshedItems.some((item) => item.priceWasUpdated);
 
       if (hasUnavailableItems) {
-        setRefreshMessage(
-          "Hay productos que ya no están disponibles. Revisá el carrito."
-        );
+        setRefreshMessage('Hay productos que ya no están disponibles. Revisá el carrito.');
         return;
       }
 
       if (hasUpdatedPrices) {
-        setRefreshMessage(
-          "Algunos precios se actualizaron. Revisá el nuevo total antes de continuar."
-        );
+        setRefreshMessage('Algunos precios se actualizaron. Revisá el nuevo total antes de continuar.');
         return;
       }
-      setRefreshMessage("");
+      setRefreshMessage('');
       setCheckoutOpen(true);
     } finally {
       setIsRefreshing(false);
@@ -77,33 +63,23 @@ export default function CartContent() {
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {hasPriceChanges && (
           <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3">
-            <p className="text-sm font-semibold text-amber-800">
-              El precio cambió. Revisá antes de continuar.
-            </p>
+            <p className="text-sm font-semibold text-amber-800">El precio cambió. Revisá antes de continuar.</p>
           </div>
         )}
         {items.map((item) => (
           <article key={item.id} className="border-b border-gray-200 pb-4">
             <div className="flex gap-3">
               {item.imageUrl && (
-                <img
-                  src={item.imageUrl}
-                  alt={item.name}
-                  className="h-16 w-16 rounded-md object-cover"
-                />
+                <img src={item.imageUrl} alt={item.name} className="h-16 w-16 rounded-md object-cover" />
               )}
 
               <div className="min-w-0 flex-1">
                 <h3 className="font-semibold text-gray-800">{item.name}</h3>
 
-                <p className="text-sm text-gray-600">
-                  {currencyFormatter.format(item.unitPrice)}
-                </p>
+                <p className="text-sm text-gray-600">{currencyFormatter.format(item.unitPrice)}</p>
 
                 {!item.isAvailable && (
-                  <p className="text-sm font-semibold text-red-600">
-                    Este producto ya no está disponible.
-                  </p>
+                  <p className="text-sm font-semibold text-red-600">Este producto ya no está disponible.</p>
                 )}
 
                 <div className="mt-2 flex items-center justify-between">
@@ -131,9 +107,7 @@ export default function CartContent() {
                   </div>
                   {item.priceWasUpdated && (
                     <div className="mt-2 flex items-center gap-2">
-                      <span className="text-sm font-semibold text-amber-700">
-                        Precio actualizado
-                      </span>
+                      <span className="text-sm font-semibold text-amber-700">Precio actualizado</span>
 
                       <button
                         type="button"
@@ -190,7 +164,7 @@ export default function CartContent() {
           disabled={hasUnavailableItems || isRefreshing || hasPriceChanges}
           className="mt-4 w-full rounded-lg bg-[#3163b3] px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isRefreshing ? "Actualizando..." : "Comprar"}
+          {isRefreshing ? 'Actualizando...' : 'Comprar'}
         </button>
         {refreshMessage && (
           <p className="mt-3 text-sm font-semibold text-[#3163b3]" role="alert">
@@ -198,6 +172,7 @@ export default function CartContent() {
           </p>
         )}
       </div>
+      {checkoutOpen && <CheckoutForm items={items} onClose={() => setCheckoutOpen(false)} />}
     </div>
   );
 }
