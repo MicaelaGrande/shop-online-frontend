@@ -1,20 +1,24 @@
-import { useEffect, useState } from "react";
-import { createOrder, getOrderAdmins } from "../service/api";
-import { useCart } from "../contexts/useCart";
+import { useEffect, useState } from 'react';
+import { createOrder, getOrderAdmins } from '../service/api';
+import { useCart } from '../contexts/useCart';
+const currencyFormatter = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: 'ARS'
+});
 
 export default function CheckoutForm({ items, onClose }) {
   const { clearCart } = useCart();
   const [admins, setAdmins] = useState([]);
-  const [selectedAdminId, setSelectedAdminId] = useState("");
+  const [selectedAdminId, setSelectedAdminId] = useState('');
   const [loadingAdmins, setLoadingAdmins] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [orderId, setOrderId] = useState(null);
   const [form, setForm] = useState({
-    customer_name: "",
-    customer_phone: "",
-    customer_address: "",
-    comments: "",
+    customer_name: '',
+    customer_phone: '',
+    customer_address: '',
+    comments: ''
   });
 
   useEffect(() => {
@@ -26,7 +30,7 @@ export default function CheckoutForm({ items, onClose }) {
       })
       .catch((requestError) => {
         if (!cancelled) {
-          setError(requestError.message || "No se pudieron cargar los administradores.");
+          setError(requestError.message || 'No se pudieron cargar los administradores.');
         }
       })
       .finally(() => {
@@ -40,10 +44,22 @@ export default function CheckoutForm({ items, onClose }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError("");
+    setError('');
     setSubmitting(true);
+    let whatsappWindow = null;
 
     try {
+      const selectedAdmin = admins.find((admin) => admin.id === Number(selectedAdminId));
+      const selectedAdminPhone = selectedAdmin?.whatsapp_phone.replace(/\D/g, '');
+
+      if (!selectedAdminPhone) {
+        throw new Error('El administrador seleccionado no tiene un WhatsApp válido.');
+      }
+      whatsappWindow = window.open('about:blank', '_blank');
+
+      if (!whatsappWindow) {
+        throw new Error('El navegador bloqueó la nueva pestaña. Permití las ventanas emergentes para continuar.');
+      }
       const createdOrder = await createOrder({
         customer_name: form.customer_name.trim(),
         customer_phone: form.customer_phone.trim(),
@@ -52,14 +68,39 @@ export default function CheckoutForm({ items, onClose }) {
         assigned_admin_id: Number(selectedAdminId),
         items: items.map((item) => ({
           product_id: item.id,
-          quantity: item.quantity,
-        })),
+          quantity: item.quantity
+        }))
       });
+      const whatsappNumber = createdOrder.assigned_admin.whatsapp_phone.replace(/\D/g, '');
+
+      const orderLines = createdOrder.items.map((item) => {
+        const unitPrice = Number(item.unit_price);
+
+        return `- ${item.quantity} x ${item.name} -- ${currencyFormatter.format(unitPrice)} c/u`;
+      });
+
+      const total = createdOrder.items.reduce((sum, item) => sum + Number(item.unit_price) * item.quantity, 0);
+
+      const message = [
+        `¡Hola! 💕 ¿Cómo están?, soy: ${form.customer_name.trim()}`,
+        'Estuve eligiendo algunas cositas de su tienda y este es mi pedido:',
+        '✨ Productos elegidos',
+        ...orderLines,
+        ...(createdOrder.comments ? [`📝 Comentarios: ${createdOrder.comments}`] : []),
+        `🤍 Total del pedido: ${currencyFormatter.format(total)}`,
+        '',
+        '¡Me gustaría concretar la compra! ¿Me ayudan a coordinar el pago y la entrega?',
+
+        '¡Gracias! 🫶'
+      ].join('\n');
 
       clearCart();
       setOrderId(createdOrder.id);
+      whatsappWindow.location.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+      whatsappWindow.opener = null;
     } catch (requestError) {
-      setError(requestError.message || "No se pudo crear el pedido.");
+      setError(requestError.message || 'No se pudo crear el pedido.');
+      setError(requestError.message || 'No se pudo crear el pedido.');
     } finally {
       setSubmitting(false);
     }
@@ -78,9 +119,7 @@ export default function CheckoutForm({ items, onClose }) {
             <h2 id="checkout-title" className="text-xl font-bold text-[#3163b3]">
               Pedido creado
             </h2>
-            <p className="my-4 text-gray-700">
-              Tu pedido se registro correctamente.
-            </p>
+            <p className="my-4 text-gray-700">Tu pedido se registro correctamente.</p>
             <button
               type="button"
               onClick={onClose}
@@ -103,9 +142,7 @@ export default function CheckoutForm({ items, onClose }) {
                   minLength={2}
                   maxLength={80}
                   value={form.customer_name}
-                  onChange={(event) =>
-                    setForm({ ...form, customer_name: event.target.value })
-                  }
+                  onChange={(event) => setForm({ ...form, customer_name: event.target.value })}
                   className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
                 />
               </label>
@@ -118,9 +155,7 @@ export default function CheckoutForm({ items, onClose }) {
                   maxLength={50}
                   type="tel"
                   value={form.customer_phone}
-                  onChange={(event) =>
-                    setForm({ ...form, customer_phone: event.target.value })
-                  }
+                  onChange={(event) => setForm({ ...form, customer_phone: event.target.value })}
                   className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
                 />
               </label>
@@ -130,9 +165,7 @@ export default function CheckoutForm({ items, onClose }) {
                 <input
                   maxLength={255}
                   value={form.customer_address}
-                  onChange={(event) =>
-                    setForm({ ...form, customer_address: event.target.value })
-                  }
+                  onChange={(event) => setForm({ ...form, customer_address: event.target.value })}
                   className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
                 />
               </label>
@@ -141,9 +174,7 @@ export default function CheckoutForm({ items, onClose }) {
                 Comentarios (opcional)
                 <textarea
                   value={form.comments}
-                  onChange={(event) =>
-                    setForm({ ...form, comments: event.target.value })
-                  }
+                  onChange={(event) => setForm({ ...form, comments: event.target.value })}
                   className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2"
                   rows={3}
                 />
@@ -159,7 +190,7 @@ export default function CheckoutForm({ items, onClose }) {
                   className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2"
                 >
                   <option value="" disabled>
-                    {loadingAdmins ? "Cargando administradores..." : "Seleccioná un administrador"}
+                    {loadingAdmins ? 'Cargando administradores...' : 'Seleccioná un administrador'}
                   </option>
                   {admins.map((admin) => (
                     <option key={admin.id} value={admin.id}>
@@ -194,7 +225,7 @@ export default function CheckoutForm({ items, onClose }) {
                   disabled={submitting || loadingAdmins || admins.length === 0}
                   className="rounded-md bg-[#3163b3] px-4 py-2 font-semibold text-white disabled:opacity-50"
                 >
-                  {submitting ? "Enviando..." : "Confirmar pedido"}
+                  {submitting ? 'Enviando...' : 'Confirmar pedido'}
                 </button>
               </div>
             </form>
