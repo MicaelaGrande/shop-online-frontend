@@ -2,18 +2,21 @@ import { Minus, Plus, ShoppingBag, Trash2, Check } from 'lucide-react';
 import { useCart } from '../contexts/useCart';
 import { useState } from 'react';
 import CheckoutForm from '../components/CheckoutForm';
+import { useAuth } from '../contexts/useAuth';
+import AdminPendingOrders from '../components/AdminPendingOrders';
 
 const currencyFormatter = new Intl.NumberFormat('es-AR', {
   style: 'currency',
   currency: 'ARS'
 });
 
-export default function CartContent() {
+export default function CartContent({onClosePanel}) {
   const { items, removeFromCart, updateQuantity, totalItems, totalPrice, refreshCart, acknowledgePriceChange } =
     useCart();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshMessage, setRefreshMessage] = useState('');
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const { admin } = useAuth();
   const handleRemoveItem = (productId) => {
     removeFromCart(productId);
     setRefreshMessage('');
@@ -44,6 +47,9 @@ export default function CartContent() {
       setIsRefreshing(false);
     }
   };
+  if (admin) {
+    return <AdminPendingOrders onClosePanel={onClosePanel} />;
+  }
 
   if (items.length === 0) {
     return (
