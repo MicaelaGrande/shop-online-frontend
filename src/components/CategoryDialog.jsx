@@ -1,11 +1,41 @@
 import { useEffect, useRef, useState } from 'react';
-import { createCategory, updateCategory } from '../service/api';
+import { createCategory, updateCategory, getCategoryIcons } from '../service/api';
+import { DynamicIcon } from 'lucide-react/dynamic';
 
 export default function CategoryDialog({ open, onClose, onSaved, category = null }) {
   const dialogRef = useRef(null);
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [iconOptions, setIconOptions] = useState([]);
+  const [iconKey, setIconKey] = useState('tags');
+
+  useEffect(() => {
+    if (!open) return;
+
+    let cancelled = false;
+
+    getCategoryIcons()
+      .then((icons) => {
+        if (cancelled) return;
+
+        setIconOptions(icons);
+
+        const currentIcon = category?.icon_key ?? 'tags';
+        if (!icons.includes(currentIcon)) {
+          setIconKey(icons.includes('tags') ? 'tags' : icons[0]);
+        }
+      })
+      .catch((requestError) => {
+        if (!cancelled) {
+          setError(requestError.message || 'No se pudieron cargar los iconos.');
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, category?.icon_key]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -14,11 +44,12 @@ export default function CategoryDialog({ open, onClose, onSaved, category = null
     if (open && !dialog.open) {
       dialog.showModal();
       setName(category?.name ?? '');
+      setIconKey(category?.icon_key ?? 'tags');
       setError('');
     } else if (!open && dialog.open) {
       dialog.close();
     }
-  }, [open, category?.name]);
+  }, [open, category?.name, category?.id, category?.icon_key]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -34,10 +65,14 @@ export default function CategoryDialog({ open, onClose, onSaved, category = null
     setError('');
 
     try {
-      const savedCategory = category
-        ? await updateCategory(category.id, trimmedName)
-        : await createCategory(trimmedName);
+      const categoryData = {
+        name: trimmedName,
+        icon_key: iconKey
+      };
 
+      const savedCategory = category
+        ? await updateCategory(category.id, categoryData)
+        : await createCategory(categoryData);
       onSaved?.(savedCategory);
       onClose();
     } catch (requestError) {
@@ -74,6 +109,28 @@ export default function CategoryDialog({ open, onClose, onSaved, category = null
             autoFocus
             className="w-full rounded-md border border-gray-300 px-3 py-2"
           />
+        </div>
+        <div>
+          <label htmlFor="category-icon" className="mb-1 block text-sm font-semibold text-[#3163b3]">
+            Icono
+          </label>
+
+          <div className="flex items-center gap-3">
+            <select
+              id="category-icon"
+              value={iconKey}
+              onChange={(event) => setIconKey(event.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2"
+            >
+              {iconOptions.map((iconName) => (
+                <option key={iconName} value={iconName}>
+                  {iconName}
+                </option>
+              ))}
+            </select>
+
+            <DynamicIcon name={iconKey} size={24} />
+          </div>
         </div>
 
         {error && (
