@@ -214,14 +214,15 @@ function ProductPage() {
 
             <ProductPrice price={product.price} isOnSale={product.is_on_sale} salePrice={product.sale_price} />
 
-            <button
+            {!admin && (<button
               type="button"
               onClick={() => addToCart(product)}
               className="w-full rounded-md bg-[#3163b3] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#244b8a] md:w-fit"
             >
               Agregar al carrito
-            </button>
+            </button>)}
           </div>
+          
         )}
       </div>
     </div>

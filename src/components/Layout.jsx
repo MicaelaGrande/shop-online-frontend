@@ -1,27 +1,29 @@
-import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import { useCart } from "../contexts/useCart";
-import SidePanel from "./SidePanel";
-import MenuContent from "./MenuContent";
-import CartContent from "../containers/CartContent";
-import Footer from "./Footer";
-import Header from "./Header";
-import WhatsAppButton from "./WhatsAppButton";
-import SessionExpiredModal from "./SessionExpireModal";
+import { useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useCart } from '../contexts/useCart';
+import SidePanel from './SidePanel';
+import MenuContent from './MenuContent';
+import CartContent from '../containers/CartContent';
+import Footer from './Footer';
+import Header from './Header';
+import WhatsAppButton from './WhatsAppButton';
+import SessionExpiredModal from './SessionExpireModal';
+import { useAuth } from '../contexts/useAuth';
 
 function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
-  const { refreshCart } = useCart();
+  const { refreshCart, cartNotice, dismissCartNotice } = useCart();
+  const { admin } = useAuth();
 
   const handleSearch = () => {
     const trimmedSearch = searchTerm.trim();
 
     if (!trimmedSearch) {
-      navigate("/catalog");
+      navigate('/catalog');
       return;
     }
 
@@ -65,25 +67,39 @@ function Layout() {
 
       <WhatsAppButton />
 
-      <SidePanel
-        isOpen={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        title="Menú"
-        side="left"
-      >
+      <SidePanel isOpen={menuOpen} onClose={() => setMenuOpen(false)} title="Menú" side="left">
         <MenuContent onCategorySelect={() => setMenuOpen(false)} />
       </SidePanel>
 
       <SidePanel
         isOpen={shopOpen}
         onClose={() => setShopOpen(false)}
-        title="Carrito"
+        title={admin ? 'Pedidos pendientes' : 'Carrito'}
         side="right"
       >
-        <CartContent />
+        <CartContent onClosePanel={() => setShopOpen(false)} />
       </SidePanel>
 
       <SessionExpiredModal />
+      {cartNotice && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed right-4 top-24 z-[60] flex max-w-sm items-center gap-3 rounded-lg border border-green-200 bg-white px-4 py-3 text-sm text-gray-800 shadow-lg"
+        >
+          <span className="flex-1">{cartNotice}</span>
+          <button
+            type="button"
+            onClick={() => {
+              dismissCartNotice();
+              setShopOpen(true);
+            }}
+            className="font-semibold text-[#3163b3] hover:underline"
+          >
+            Ver carrito
+          </button>
+        </div>
+      )}
     </div>
   );
 }
