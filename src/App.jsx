@@ -9,6 +9,7 @@ import ProductPage from "./containers/productPage";
 import ProductCreatePage from "./containers/ProductCreatePage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContexts";
+import AdminOrdersPage from "./containers/AdminOrdersPage";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
               <Route path="/products/new" element={<ProductCreatePage />} />
               <Route path="/products/:productId" element={<ProductPage />} />
               <Route path="/products/:productId" element={<ProductPage />} />
+              <Route path="admin/orders" element={<AdminOrdersPage />} />
             </Route>
 
             <Route path="/login" element={<Login />} />
