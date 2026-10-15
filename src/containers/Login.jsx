@@ -1,17 +1,62 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, admin, logoutAdmin, loading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [justLoggedIn, setJustLoggedIn] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+
+  const handleLogout = async () => {
+    const confirmed = window.confirm('¿Querés cerrar sesión?');
+    if (!confirmed) return;
+
+    await logoutAdmin();
+    navigate('/login', { replace: true });
+  };
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#DDE8F3]">
+        <p className="text-lg font-semibold text-[#0a3d64]">Verificando sesión...</p>
+      </div>
+    );
+  }
+
+  if (admin && !justLoggedIn) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#DDE8F3] px-4">
+        <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow-lg">
+          <h2 className="text-2xl font-bold text-[#0a3d64]">Sesión activa</h2>
+          <p className="mt-3 text-slate-600">Ya hay una sesión abierta. ¿Querés cerrar sesión o volver al inicio?</p>
+
+          <div className="mt-6 flex justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/', { replace: true })}
+              className="rounded-lg bg-[#3163b3] px-4 py-2 font-semibold text-white"
+            >
+              Volver
+            </button>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-lg border border-red-500 px-4 py-2 font-semibold text-red-600"
+            >
+              Salir
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const validate = () => {
     let valid = true;
@@ -43,6 +88,7 @@ export default function Login() {
 
     try {
       await login(email, password);
+      setJustLoggedIn(true);
       navigate('/');
     } catch (error) {
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
@@ -54,6 +100,7 @@ export default function Login() {
       setIsLoading(false);
     }
   };
+
   return (
     <div
       className="
