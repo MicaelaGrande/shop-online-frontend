@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { CartContext } from "./cart-context";
-import { fetchUpdatedCartItems } from "./cart-utils";
+import { useEffect, useRef, useState } from 'react';
+import { CartContext } from './cart-context';
+import { fetchUpdatedCartItems } from './cart-utils';
 
-const CART_STORAGE_KEY = "mixshop-cart";
+const CART_STORAGE_KEY = 'mixshop-cart';
 
 function readStoredCart() {
   try {
@@ -15,26 +15,29 @@ function readStoredCart() {
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState(readStoredCart);
+  const [cartNotice, setCartNotice] = useState('');
+  const noticeTimer = useRef(null);
 
+  const dismissCartNotice = () => {
+    window.clearTimeout(noticeTimer.current);
+    setCartNotice('');
+  };
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
   const addToCart = (product) => {
+    setCartNotice(`${product.name} se agregó al carrito`);
+    window.clearTimeout(noticeTimer.current);
+    noticeTimer.current = window.setTimeout(() => setCartNotice(''), 3000);
     const unitPrice =
-      product.is_on_sale && product.sale_price != null
-        ? Number(product.sale_price)
-        : Number(product.price);
+      product.is_on_sale && product.sale_price != null ? Number(product.sale_price) : Number(product.price);
 
     setItems((currentItems) => {
       const existingItem = currentItems.find((item) => item.id === product.id);
 
       if (existingItem) {
-        return currentItems.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+        return currentItems.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
       }
 
       return [
@@ -46,26 +49,20 @@ export function CartProvider({ children }) {
           imageUrl: product.media?.[0]?.url ?? null,
           quantity: 1,
           isAvailable: true,
-          priceWasUpdated: false,
-        },
+          priceWasUpdated: false
+        }
       ];
     });
   };
 
   const removeFromCart = (productId) => {
-    setItems((currentItems) =>
-      currentItems.filter((item) => item.id !== productId)
-    );
+    setItems((currentItems) => currentItems.filter((item) => item.id !== productId));
   };
 
   const updateQuantity = (productId, quantity) => {
     if (quantity < 1) return;
 
-    setItems((currentItems) =>
-      currentItems.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
-      )
-    );
+    setItems((currentItems) => currentItems.map((item) => (item.id === productId ? { ...item, quantity } : item)));
   };
 
   const clearCart = () => {
@@ -74,16 +71,13 @@ export function CartProvider({ children }) {
 
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
 
-  const totalPrice = items.reduce(
-    (total, item) => total + item.unitPrice * item.quantity,
-    0
-  );
+  const totalPrice = items.reduce((total, item) => total + item.unitPrice * item.quantity, 0);
   const refreshCart = async () => {
     const updatesById = await fetchUpdatedCartItems(items);
 
     const refreshedItems = items.map((item) => ({
       ...item,
-      ...updatesById.get(item.id),
+      ...updatesById.get(item.id)
     }));
 
     setItems(refreshedItems);
@@ -92,9 +86,7 @@ export function CartProvider({ children }) {
   };
   const acknowledgePriceChange = (productId) => {
     setItems((currentItems) =>
-      currentItems.map((item) =>
-        item.id === productId ? { ...item, priceWasUpdated: false } : item
-      )
+      currentItems.map((item) => (item.id === productId ? { ...item, priceWasUpdated: false } : item))
     );
   };
   return (
@@ -109,6 +101,8 @@ export function CartProvider({ children }) {
         acknowledgePriceChange,
         totalItems,
         totalPrice,
+        cartNotice,
+        dismissCartNotice
       }}
     >
       {children}
