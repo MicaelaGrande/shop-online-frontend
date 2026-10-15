@@ -129,10 +129,10 @@ export function restoreProduct(productId) {
     authRequired: true
   });
 }
-export function createCategory(name) {
+export function createCategory(categoryData) {
   return request('/categories/', {
     method: 'POST',
-    body: JSON.stringify({ name }),
+    body: JSON.stringify(categoryData),
     authRequired: true
   });
 }
@@ -140,10 +140,10 @@ export function getCategories() {
   return request('/categories/');
 }
 
-export function updateCategory(categoryId, name) {
+export function updateCategory(categoryId, categoryData) {
   return request(`/categories/${categoryId}`, {
     method: 'PATCH',
-    body: JSON.stringify({ name }),
+    body: JSON.stringify(categoryData),
     authRequired: true
   });
 }
@@ -167,6 +167,10 @@ export function deleteCategory(categoryId) {
     method: 'DELETE',
     authRequired: true
   });
+}
+
+export function getCategoryIcons() {
+  return request('/categories/icons');
 }
 export function loginAdmin(email, password) {
   const formData = new URLSearchParams({
@@ -201,6 +205,36 @@ export function createOrder(orderData) {
   return request('/orders/', {
     method: 'POST',
     body: JSON.stringify(orderData)
+  });
+}
+
+export function getAdminOrders({ status, assignedAdminId, limit = 10, offset = 0 } = {}) {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset)
+  });
+
+  if (status) params.set('status', status);
+  if (assignedAdminId != null) {
+    params.set('assigned_admin_id', String(assignedAdminId));
+  }
+
+  return request(`/orders/admin?${params.toString()}`, {
+    authRequired: true
+  });
+}
+
+export function getAdminOrder(orderId) {
+  return request(`/orders/admin/${orderId}`, {
+    authRequired: true
+  });
+}
+
+export function updateAdminOrderStatus(orderId, status) {
+  return request(`/orders/admin/${orderId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+    authRequired: true
   });
 }
 
