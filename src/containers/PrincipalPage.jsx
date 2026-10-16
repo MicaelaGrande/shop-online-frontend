@@ -1,27 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { Swiper, SwiperSlide } from 'swiper/react';
-// import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import ProductCard from '../components/ProductCard';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { getProducts } from '../service/api';
 import { useAuth } from '../contexts/useAuth';
-import MixshopBanner from '../animation/MixshopAnimation';
 import CategoryShortcuts from '../components/CategoryShortCuts';
+import MixshopBanner from '../animation/MixshopAnimation';
 
 function PrincipalPage() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
+  const [animationFinished, setAnimationFinished] = useState(false);
   const { admin } = useAuth();
   useEffect(() => {
-    getProducts()
-      .then((data) => {
-        setProducts(data.slice(0, 16));
-      })
+    getProducts(16)
+      .then(setProducts)
       .catch(() => {
         setError(true);
       })
@@ -35,11 +32,10 @@ function PrincipalPage() {
   };
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-8 mt-6 pb-12">
-      {/* SECCIÓN 1.5 - Carrusel */}
       <MixshopBanner />
+
       <CategoryShortcuts />
 
-      {/* BANNER NUEVOS INGRESOS */}
       <div className="w-full py-2 px-4 md:py-3 md:px-6 bg-[#3163b3]/20 rounded-2xl overflow-hidden shadow-md mb-6">
         <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <h3 className="text-xl md:text-2xl font-bold text-[#3163b3] mb-0">

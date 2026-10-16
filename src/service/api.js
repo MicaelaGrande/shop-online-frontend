@@ -49,9 +49,9 @@ async function request(endpoint, options = {}) {
 
   return responseData;
 }
-
-export function getProducts() {
-  return request('/products/');
+export function getProducts(limit) {
+  const query = limit ? `?limit=${limit}` : '';
+  return request(`/products/${query}`);
 }
 export function searchProducts(query) {
   const encodedQuery = encodeURIComponent(query.trim());
@@ -251,6 +251,36 @@ export function updateProductWithMedia(productId, productData, mediaToDelete, ne
   return request(`/media_products/${productId}/complete`, {
     method: 'PATCH',
     body: formData,
+    authRequired: true
+  });
+}
+
+export function getBannerConfig() {
+  return request('/banners/');
+}
+
+export function replaceBanner(position, image) {
+  const formData = new FormData();
+  formData.append('image', image);
+
+  return request(`/banners/${position}`, {
+    method: 'PUT',
+    body: formData,
+    authRequired: true
+  });
+}
+
+export function deleteBanner(position) {
+  return request(`/banners/${position}`, {
+    method: 'DELETE',
+    authRequired: true
+  });
+}
+
+export function updateBannerLayout(layoutMode) {
+  return request('/banners/settings', {
+    method: 'PUT',
+    body: JSON.stringify({ layout_mode: layoutMode }),
     authRequired: true
   });
 }

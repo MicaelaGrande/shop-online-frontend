@@ -10,6 +10,7 @@ import WhatsAppButton from './WhatsAppButton';
 import SessionExpiredModal from './SessionExpireModal';
 import { useAuth } from '../contexts/useAuth';
 
+
 function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);

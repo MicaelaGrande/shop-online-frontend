@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createCategory, updateCategory, getCategoryIcons } from '../service/api';
-import { DynamicIcon } from 'lucide-react/dynamic';
+import { Tags, ShoppingBag, Laptop, Blocks, Zap, Shirt, Coffee, House } from 'lucide-react';
 
 export default function CategoryDialog({ open, onClose, onSaved, category = null }) {
   const dialogRef = useRef(null);

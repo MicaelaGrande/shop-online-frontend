@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 /**
  * MixshopBanner
@@ -19,10 +19,10 @@ import { useEffect, useState } from "react";
  */
 
 const DEFAULT_CATEGORIES = [
-  { label: "¿Bazar?", icon: "bazar", dx: -320, dy: -100 },
-  { label: "¿Juguetería?", icon: "toy", dx: -120, dy: -185 },
-  { label: "¿Electrónica?", icon: "tech", dx: 55, dy: -175 },
-  { label: "¿Y mucho más?", icon: "star", dx: 220, dy: -85 },
+  { label: '¿Bazar?', icon: 'bazar', dx: -320, dy: -100 },
+  { label: '¿Juguetería?', icon: 'toy', dx: -120, dy: -185 },
+  { label: '¿Electrónica?', icon: 'tech', dx: 55, dy: -175 },
+  { label: '¡Y mucho más!', icon: 'star', dx: 220, dy: -85 }
 ];
 
 /* ---------- línea de tiempo ---------- */
@@ -34,16 +34,19 @@ const at = (p) => (mp(p) / 100) * D; // segundo en que ocurre el % p de la anima
 const T = (v) => `transform:${v}`;
 const TO = (o, v) => `opacity:${o};transform:${v}`;
 const fr = (a) =>
-  [...a].sort((x, y) => x[0] - y[0]).map(([p, v]) => `${p}%{${v}}`).join("");
+  [...a]
+    .sort((x, y) => x[0] - y[0])
+    .map(([p, v]) => `${p}%{${v}}`)
+    .join('');
 const kfRaw = (name, arr) => `@keyframes mx-${name}{${fr(arr)}}`;
 // kf = animación principal (empieza recién cuando termina la asomada)
 const kf = (name, arr) => {
   const sorted = [...arr].sort((x, y) => x[0] - y[0]);
-  const first = sorted[0][1].replace(/animation-timing-function:[^;]+;/, "");
+  const first = sorted[0][1].replace(/animation-timing-function:[^;]+;/, '');
   return kfRaw(name, [[0, first], ...sorted.map(([p, v]) => [+mp(p).toFixed(3), v])]);
 };
 const cyc = (fn) => [0, 6, 12, 18, 24, 30, 36].flatMap(fn); // pasos mientras camina (0–40%)
-const EASE = "animation-timing-function:cubic-bezier(.25,.55,.45,1);";
+const EASE = 'animation-timing-function:cubic-bezier(.25,.55,.45,1);';
 const bw = (r, sx, sy) => T(`rotate(${r}deg) scale(${sx},${sy})`);
 const R = (deg) => T(`rotate(${deg}deg)`);
 
@@ -84,106 +87,285 @@ const CSS = `
 .mx-float{animation:mx-bob 2.8s ease-in-out infinite;animation-delay:calc(var(--d) + 1.2s)}
 
 /* ---- asomada inicial (% del tiempo total) ---- */
-${kfRaw("peek", [
-  [0, T("translateX(-90px)")], [3, T("translateX(-90px)")], [7, T("translateX(0px)")],
-  [8, T("translateX(10px)")], [9.5, T("translateX(0px)")], [19, T("translateX(0px)")],
-  [22, T("translateX(-90px)")], [100, T("translateX(-90px)")],
+${kfRaw('peek', [
+  [0, T('translateX(-90px)')],
+  [3, T('translateX(-90px)')],
+  [7, T('translateX(0px)')],
+  [8, T('translateX(10px)')],
+  [9.5, T('translateX(0px)')],
+  [19, T('translateX(0px)')],
+  [22, T('translateX(-90px)')],
+  [100, T('translateX(-90px)')]
 ])}
-${kfRaw("ptilt", [
-  [0, R(0)], [7, R(0)], [8, R(-9)], [10, R(0)], [14, R(4)], [17, R(-3)], [19, R(0)], [100, R(0)],
+${kfRaw('ptilt', [
+  [0, R(0)],
+  [7, R(0)],
+  [8, R(-9)],
+  [10, R(0)],
+  [14, R(4)],
+  [17, R(-3)],
+  [19, R(0)],
+  [100, R(0)]
 ])}
-${kfRaw("pa", [[0, "opacity:1"], [7.4, "opacity:1"], [7.5, "opacity:0"], [100, "opacity:0"]])}
-${kfRaw("pc", [[0, "opacity:0"], [7.4, "opacity:0"], [7.5, "opacity:1"], [11.9, "opacity:1"], [12, "opacity:0"], [100, "opacity:0"]])}
-${kfRaw("pb", [[0, "opacity:0"], [11.9, "opacity:0"], [12, "opacity:1"], [100, "opacity:1"]])}
-${kfRaw("pbang", [
-  [0, T("scale(0)")], [7.4, T("scale(0)")], [8.3, T("scale(1.35)")], [9.5, T("scale(1)")],
-  [19, T("scale(1)")], [20, T("scale(0)")], [100, T("scale(0)")],
+${kfRaw('pa', [
+  [0, 'opacity:1'],
+  [7.4, 'opacity:1'],
+  [7.5, 'opacity:0'],
+  [100, 'opacity:0']
 ])}
-${kfRaw("parm", [[0, R(35)], [12, R(35)], [13.5, R(-35)], [100, R(-35)]])}
+${kfRaw('pc', [
+  [0, 'opacity:0'],
+  [7.4, 'opacity:0'],
+  [7.5, 'opacity:1'],
+  [11.9, 'opacity:1'],
+  [12, 'opacity:0'],
+  [100, 'opacity:0']
+])}
+${kfRaw('pb', [
+  [0, 'opacity:0'],
+  [11.9, 'opacity:0'],
+  [12, 'opacity:1'],
+  [100, 'opacity:1']
+])}
+${kfRaw('pbang', [
+  [0, T('scale(0)')],
+  [7.4, T('scale(0)')],
+  [8.3, T('scale(1.35)')],
+  [9.5, T('scale(1)')],
+  [19, T('scale(1)')],
+  [20, T('scale(0)')],
+  [100, T('scale(0)')]
+])}
+${kfRaw('parm', [
+  [0, R(35)],
+  [12, R(35)],
+  [13.5, R(-35)],
+  [100, R(-35)]
+])}
 
 /* ---- animación principal (% de la parte posterior a la asomada) ---- */
-${kf("walk", [
-  [0, `${EASE}${T("translateX(-900px)")}`],
-  [40, T("translateX(0px)")],
-  [100, T("translateX(0px)")],
+${kf('walk', [
+  [0, `${EASE}${T('translateX(-900px)')}`],
+  [40, T('translateX(0px)')],
+  [100, T('translateX(0px)')]
 ])}
 /* al llegar retrocede un paso para tomar aire; con el susto retrocede otro */
-${kf("step", [
-  [0, T("translateX(0px)")], [40, T("translateX(0px)")], [43, T("translateX(-24px)")],
-  [56, T("translateX(-24px)")], [58, T("translateX(-34px)")], [100, T("translateX(-34px)")],
+${kf('step', [
+  [0, T('translateX(0px)')],
+  [40, T('translateX(0px)')],
+  [43, T('translateX(-24px)')],
+  [56, T('translateX(-24px)')],
+  [58, T('translateX(-34px)')],
+  [100, T('translateX(-34px)')]
 ])}
-${kf("legA", [
-  ...cyc((s) => [[s, R(-18)], [s + 3, R(34)]]),
-  [41, R(2)], [43, R(10)], [56, R(10)], [57, R(-20)], [58, R(14)], [100, R(14)],
+${kf('legA', [
+  ...cyc((s) => [
+    [s, R(-18)],
+    [s + 3, R(34)]
+  ]),
+  [41, R(2)],
+  [43, R(10)],
+  [56, R(10)],
+  [57, R(-20)],
+  [58, R(14)],
+  [100, R(14)]
 ])}
-${kf("legB", [
-  ...cyc((s) => [[s, R(34)], [s + 3, R(-18)]]),
-  [41, R(14)], [43, R(22)], [56, R(22)], [57, R(30)], [58, R(8)], [100, R(8)],
+${kf('legB', [
+  ...cyc((s) => [
+    [s, R(34)],
+    [s + 3, R(-18)]
+  ]),
+  [41, R(14)],
+  [43, R(22)],
+  [56, R(22)],
+  [57, R(30)],
+  [58, R(8)],
+  [100, R(8)]
 ])}
 /* torso: empuja inclinado; cansado se encorva y respira; con el susto se endereza */
-${kf("lean", [
-  ...cyc((s) => [[s, R(29)], [s + 3, R(32)]]),
-  [41, R(31)], [43, R(48)], [46, R(53)], [49, R(48)], [52, R(53)], [55, R(48)],
-  [56.5, R(6)], [69, R(8)], [70.8, R(10)], [100, R(10)],
+${kf('lean', [
+  ...cyc((s) => [
+    [s, R(29)],
+    [s + 3, R(32)]
+  ]),
+  [41, R(31)],
+  [43, R(48)],
+  [46, R(53)],
+  [49, R(48)],
+  [52, R(53)],
+  [55, R(48)],
+  [56.5, R(6)],
+  [69, R(8)],
+  [70.8, R(10)],
+  [100, R(10)]
 ])}
-${kf("head", [
-  ...cyc((s) => [[s, R(-4)], [s + 3, R(4)]]),
-  [41, R(0)], [43, R(16)], [55, R(16)], [56.5, R(-8)], [69, R(0)], [100, R(0)],
+${kf('head', [
+  ...cyc((s) => [
+    [s, R(-4)],
+    [s + 3, R(4)]
+  ]),
+  [41, R(0)],
+  [43, R(16)],
+  [55, R(16)],
+  [56.5, R(-8)],
+  [69, R(0)],
+  [100, R(0)]
 ])}
-${kf("headf", [
-  [0, R(0)], [77.5, R(0)], [79, R(-8)], [81, R(6)], [84, R(0)], [100, R(0)],
+${kf('headf', [
+  [0, R(0)],
+  [77.5, R(0)],
+  [79, R(-8)],
+  [81, R(6)],
+  [84, R(0)],
+  [100, R(0)]
 ])}
 /* brazos: empujando -> cansado (uno cuelga, el otro se limpia la frente) -> manos arriba del susto */
-${kf("armpush", [[0, "opacity:1"], [40.9, "opacity:1"], [41, "opacity:0"], [100, "opacity:0"]])}
-${kf("armtired", [[0, "opacity:0"], [40.9, "opacity:0"], [41, "opacity:1"], [100, "opacity:1"]])}
-${kf("knee", [[0, R(0)], [56, R(0)], [57, R(-150)], [100, R(-150)]])}
-${kf("wipe", [
-  [0, R(0)], [44, R(0)], [45, R(-14)], [46.5, R(10)], [48, R(-14)], [49.5, R(10)],
-  [51, R(-14)], [52.5, R(10)], [54, R(0)], [56, R(0)], [57, R(-20)], [100, R(-20)],
+${kf('armpush', [
+  [0, 'opacity:1'],
+  [40.9, 'opacity:1'],
+  [41, 'opacity:0'],
+  [100, 'opacity:0']
+])}
+${kf('armtired', [
+  [0, 'opacity:0'],
+  [40.9, 'opacity:0'],
+  [41, 'opacity:1'],
+  [100, 'opacity:1']
+])}
+${kf('knee', [
+  [0, R(0)],
+  [56, R(0)],
+  [57, R(-150)],
+  [100, R(-150)]
+])}
+${kf('wipe', [
+  [0, R(0)],
+  [44, R(0)],
+  [45, R(-14)],
+  [46.5, R(10)],
+  [48, R(-14)],
+  [49.5, R(10)],
+  [51, R(-14)],
+  [52.5, R(10)],
+  [54, R(0)],
+  [56, R(0)],
+  [57, R(-20)],
+  [100, R(-20)]
 ])}
 /* caras de perfil: esfuerzo -> cansado -> sorprendido -> feliz */
-${kf("fe", [[0, "opacity:1"], [40.9, "opacity:1"], [41, "opacity:0"], [100, "opacity:0"]])}
-${kf("ft", [[0, "opacity:0"], [40.9, "opacity:0"], [41, "opacity:1"], [56.4, "opacity:1"], [56.5, "opacity:0"], [100, "opacity:0"]])}
-${kf("fs", [[0, "opacity:0"], [56.4, "opacity:0"], [56.5, "opacity:1"], [68.9, "opacity:1"], [69, "opacity:0"], [100, "opacity:0"]])}
-${kf("fh", [[0, "opacity:0"], [68.9, "opacity:0"], [69, "opacity:1"], [100, "opacity:1"]])}
-${kf("sweatvis", [[0, "opacity:1"], [46, "opacity:1"], [47, "opacity:0"], [100, "opacity:0"]])}
+${kf('fe', [
+  [0, 'opacity:1'],
+  [40.9, 'opacity:1'],
+  [41, 'opacity:0'],
+  [100, 'opacity:0']
+])}
+${kf('ft', [
+  [0, 'opacity:0'],
+  [40.9, 'opacity:0'],
+  [41, 'opacity:1'],
+  [56.4, 'opacity:1'],
+  [56.5, 'opacity:0'],
+  [100, 'opacity:0']
+])}
+${kf('fs', [
+  [0, 'opacity:0'],
+  [56.4, 'opacity:0'],
+  [56.5, 'opacity:1'],
+  [68.9, 'opacity:1'],
+  [69, 'opacity:0'],
+  [100, 'opacity:0']
+])}
+${kf('fh', [
+  [0, 'opacity:0'],
+  [68.9, 'opacity:0'],
+  [69, 'opacity:1'],
+  [100, 'opacity:1']
+])}
+${kf('sweatvis', [
+  [0, 'opacity:1'],
+  [46, 'opacity:1'],
+  [47, 'opacity:0'],
+  [100, 'opacity:0']
+])}
 /* girar: el de perfil se achata y el de frente se abre */
-${kf("turnside", [
-  [0, TO(1, "scaleX(1)")], [69.5, TO(1, "scaleX(1)")], [71, TO(1, "scaleX(0)")],
-  [71.1, TO(0, "scaleX(0)")], [100, TO(0, "scaleX(0)")],
+${kf('turnside', [
+  [0, TO(1, 'scaleX(1)')],
+  [69.5, TO(1, 'scaleX(1)')],
+  [71, TO(1, 'scaleX(0)')],
+  [71.1, TO(0, 'scaleX(0)')],
+  [100, TO(0, 'scaleX(0)')]
 ])}
-${kf("turnfront", [
-  [0, TO(0, "scaleX(0)")], [71, TO(0, "scaleX(0)")], [71.1, TO(1, "scaleX(0)")],
-  [73, TO(1, "scaleX(1.08)")], [74.5, TO(1, "scaleX(1)")], [100, TO(1, "scaleX(1)")],
+${kf('turnfront', [
+  [0, TO(0, 'scaleX(0)')],
+  [71, TO(0, 'scaleX(0)')],
+  [71.1, TO(1, 'scaleX(0)')],
+  [73, TO(1, 'scaleX(1.08)')],
+  [74.5, TO(1, 'scaleX(1)')],
+  [100, TO(1, 'scaleX(1)')]
 ])}
-${kf("hop", [
-  [0, T("translateY(0)")], [55.5, T("translateY(0)")], [56.5, T("translateY(-26px)")],
-  [58, T("translateY(0)")], [75.5, T("translateY(0)")], [77, T("translateY(-30px)")],
-  [78.5, T("translateY(0)")], [80.5, T("translateY(-22px)")], [82, T("translateY(0)")],
-  [100, T("translateY(0)")],
+${kf('hop', [
+  [0, T('translateY(0)')],
+  [55.5, T('translateY(0)')],
+  [56.5, T('translateY(-26px)')],
+  [58, T('translateY(0)')],
+  [75.5, T('translateY(0)')],
+  [77, T('translateY(-30px)')],
+  [78.5, T('translateY(0)')],
+  [80.5, T('translateY(-22px)')],
+  [82, T('translateY(0)')],
+  [100, T('translateY(0)')]
 ])}
 /* caja: vibra al empujar, se mueve sola (susto) y se abre */
-${kf("boxwob", [
-  ...cyc((s) => [[s, bw(0, 1, 1)], [s + 3, bw(-1, 1, 1)]]),
-  [40, bw(0, 1, 1)], [55, bw(0, 1, 1)],
+${kf('boxwob', [
+  ...cyc((s) => [
+    [s, bw(0, 1, 1)],
+    [s + 3, bw(-1, 1, 1)]
+  ]),
+  [40, bw(0, 1, 1)],
+  [55, bw(0, 1, 1)],
   ...Array.from({ length: 13 }, (_, i) => {
     const a = 2 + i * 0.4;
     return [56.5 + i, bw(i % 2 ? a : -a, 1 + i * 0.004, 1 - i * 0.006)];
   }),
-  [69.2, bw(0, 1, 1)], [100, bw(0, 1, 1)],
+  [69.2, bw(0, 1, 1)],
+  [100, bw(0, 1, 1)]
 ])}
-${kf("closed", [[0, "opacity:1"], [68.99, "opacity:1"], [69, "opacity:0"], [100, "opacity:0"]])}
-${kf("open", [
-  [0, TO(0, "scale(.7,.7)")], [68.99, TO(0, "scale(.7,.7)")], [69, TO(1, "scale(.7,.7)")],
-  [70.5, TO(1, "scale(1.08,.9)")], [72, TO(1, "scale(.97,1.06)")], [73.5, TO(1, "scale(1,1)")],
-  [100, TO(1, "scale(1,1)")],
+${kf('closed', [
+  [0, 'opacity:1'],
+  [68.99, 'opacity:1'],
+  [69, 'opacity:0'],
+  [100, 'opacity:0']
 ])}
-${kf("facepop", [
-  [0, T("scale(0)")], [71, T("scale(0)")], [73, T("scale(1.3)")], [75, T("scale(1)")],
-  [100, T("scale(1)")],
+${kf('open', [
+  [0, TO(0, 'scale(.7,.7)')],
+  [68.99, TO(0, 'scale(.7,.7)')],
+  [69, TO(1, 'scale(.7,.7)')],
+  [70.5, TO(1, 'scale(1.08,.9)')],
+  [72, TO(1, 'scale(.97,1.06)')],
+  [73.5, TO(1, 'scale(1,1)')],
+  [100, TO(1, 'scale(1,1)')]
 ])}
-${kf("armR", [[0, R(140)], [77.5, R(140)], [79, R(-15)], [80.5, R(0)], [100, R(0)]])}
-${kf("armL", [[0, R(-140)], [77.5, R(-140)], [79, R(15)], [80.5, R(0)], [100, R(0)]])}
+${kf('facepop', [
+  [0, T('scale(0)')],
+  [71, T('scale(0)')],
+  [73, T('scale(1.3)')],
+  [75, T('scale(1)')],
+  [100, T('scale(1)')]
+])}
+${kf('armR', [
+  [0, R(140)],
+  [77.5, R(140)],
+  [79, R(-15)],
+  [80.5, R(0)],
+  [100, R(0)]
+])}
+${kf('armL', [
+  [0, R(-140)],
+  [77.5, R(-140)],
+  [79, R(15)],
+  [80.5, R(0)],
+  [100, R(0)]
+])}
 @keyframes mx-wave{0%{transform:rotate(-8deg)}100%{transform:rotate(14deg)}}
 @keyframes mx-sweat{0%{transform:translate(0,0);opacity:0}20%{opacity:1}100%{transform:translate(-6px,26px);opacity:0}}
 @keyframes mx-pop{
@@ -200,9 +382,9 @@ ${kf("armL", [[0, R(-140)], [77.5, R(-140)], [79, R(15)], [80.5, R(0)], [100, R(
 
 /* ---------- íconos dibujados a mano (centrados en 0,0) ---------- */
 function Icon({ type }) {
-  const p = "mx-s mx-t";
+  const p = 'mx-s mx-t';
   switch (type) {
-    case "bazar":
+    case 'bazar':
       return (
         <g>
           <path className={p} d="M-12 -4 L-12 16 Q0 23 12 16 L12 -4 Z" />
@@ -212,7 +394,7 @@ function Icon({ type }) {
           <circle className={p} cx="-9" cy="-24" r="4" />
         </g>
       );
-    case "toy":
+    case 'toy':
       return (
         <g>
           <circle className={p} cx="-10" cy="-14" r="5" />
@@ -223,7 +405,7 @@ function Icon({ type }) {
           <circle cx="4" cy="-8" r="1.8" fill="#0b5aa5" />
         </g>
       );
-    case "tech":
+    case 'tech':
       return (
         <g>
           <rect className={p} x="-20" y="-16" width="40" height="26" rx="4" />
@@ -242,7 +424,7 @@ function Icon({ type }) {
 
 /* Caja: se dibuja en las coordenadas del logo (500x500) y se escala.
    Origen local = vértice inferior central de la caja (apoyado en el suelo). */
-const BOX = "scale(.46) translate(-245 -450)";
+const BOX = 'scale(.46) translate(-245 -450)';
 
 function Box() {
   return (
@@ -288,12 +470,17 @@ export default function MixshopBanner({
   categories = DEFAULT_CATEGORIES,
   loop = false,
   rough = false,
-  className = "",
-  buttonLabel = "¡Ver todo!",
+  className = '',
+  buttonLabel = '¡Ver todo!',
   href,
   onButtonClick,
+  onComplete
 }) {
   const [run, setRun] = useState(0);
+  useEffect(() => {
+    const timer = window.setTimeout(() => onComplete?.(), D * 1000);
+    return () => window.clearTimeout(timer);
+  }, [run, onComplete]);
 
   useEffect(() => {
     if (!loop) return;
@@ -314,13 +501,19 @@ export default function MixshopBanner({
           <defs>
             <filter id="mx-rough" x="-5%" y="-5%" width="110%" height="110%">
               <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="1" result="n">
-                <animate attributeName="seed" values="1;4;7;2" dur="0.6s" repeatCount="indefinite" calcMode="discrete" />
+                <animate
+                  attributeName="seed"
+                  values="1;4;7;2"
+                  dur="0.6s"
+                  repeatCount="indefinite"
+                  calcMode="discrete"
+                />
               </feTurbulence>
               <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5" />
             </filter>
           </defs>
 
-          <g filter={rough ? "url(#mx-rough)" : undefined}>
+          <g filter={rough ? 'url(#mx-rough)' : undefined}>
             {/* ================= SUELO ================= */}
             <path className="mx-s mx-t" d="M0 307 Q150 302 300 307 T600 307 T900 305" />
             <path
@@ -400,9 +593,9 @@ export default function MixshopBanner({
                         <g
                           key={c.label}
                           className="mx-pop"
-                          style={{ "--dx": `${c.dx}px`, "--dy": `${c.dy}px`, "--d": d }}
+                          style={{ '--dx': `${c.dx}px`, '--dy': `${c.dy}px`, '--d': d }}
                         >
-                          <g className="mx-float" style={{ "--d": d }}>
+                          <g className="mx-float" style={{ '--d': d }}>
                             <Icon type={c.icon} />
                             <rect className="mx-pill" x={-w / 2} y="30" width={w} height="32" rx="16" />
                             <text className="mx-txt" x="0" y="53">

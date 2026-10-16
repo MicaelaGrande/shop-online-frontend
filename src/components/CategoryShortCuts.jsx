@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DynamicIcon } from 'lucide-react/dynamic';
+import { Tags, ShoppingBag, Laptop, Blocks, Zap, Shirt, Coffee, House } from 'lucide-react';
+
 import { getCategories } from '../service/api';
 
 export default function CategoryShortcuts() {
@@ -8,6 +9,16 @@ export default function CategoryShortcuts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
+  const categoryIcons = {
+    tags: Tags,
+    'shopping-bag': ShoppingBag,
+    laptop: Laptop,
+    blocks: Blocks,
+    zap: Zap,
+    shirt: Shirt,
+    coffee: Coffee,
+    house: House
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -30,7 +41,7 @@ export default function CategoryShortcuts() {
 
   const selectCategory = (categoryId) => {
     navigate('/catalog', {
-      state: { categoryToFilter: categoryId },
+      state: { categoryToFilter: categoryId }
     });
   };
 
@@ -39,7 +50,11 @@ export default function CategoryShortcuts() {
   }
 
   if (error) {
-    return <p role="alert" className="py-4 text-center text-red-600">No se pudieron cargar las categorías.</p>;
+    return (
+      <p role="alert" className="py-4 text-center text-red-600">
+        No se pudieron cargar las categorías.
+      </p>
+    );
   }
 
   if (categories.length === 0) {
@@ -49,22 +64,22 @@ export default function CategoryShortcuts() {
   return (
     <nav aria-label="Categorías" className="my-6">
       <ul className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {categories.map((category) => (
-          <li key={category.id}>
-            <button
-              type="button"
-              onClick={() => selectCategory(category.id)}
-              className="flex w-full flex-col items-center gap-2 py-3 font-semibold text-[#3163b3] hover:text-[#0a3d64]"
-            >
-              <DynamicIcon
-                name={category.icon_key || 'tags'}
-                size={30}
-                aria-hidden="true"
-              />
-              <span className="text-center">{category.name}</span>
-            </button>
-          </li>
-        ))}
+        {categories.map((category) => {
+          const Icon = categoryIcons[category.icon_key] ?? Tags;
+
+          return (
+            <li key={category.id}>
+              <button
+                type="button"
+                onClick={() => selectCategory(category.id)}
+                className="flex w-full flex-col items-center gap-2 py-3 font-semibold text-[#3163b3] hover:text-[#0a3d64]"
+              >
+                <Icon size={30} aria-hidden="true" />
+                <span className="text-center">{category.name}</span>
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );

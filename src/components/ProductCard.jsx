@@ -21,6 +21,8 @@ function ProductCard({ product, selectionMode = false, selected = false, onToggl
         }}
       >
         <img
+          loading="lazy"
+          decoding="async"
           src={
             product.media && product.media[0]?.url
               ? product.media[0].url
